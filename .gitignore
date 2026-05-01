@@ -1,0 +1,14 @@
+# Node 依赖
+node_modules/
+
+# 环境变量（密码、密钥绝不能传）
+.env
+.env.local
+
+# 系统缓存
+.DS_Store
+Thumbs.db
+
+# 日志
+npm-debug.log*
+yarn-debug.log*
