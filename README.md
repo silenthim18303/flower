@@ -44,15 +44,17 @@ npx http-server .
 
 ```text
 .
-├─ index.html        # 主游戏入口与核心逻辑
+├─ index.html        # 主游戏入口（页面骨架与资源引用）
 ├─ phaser.min.js     # Phaser 引擎文件
+├─ scripts/game.js   # 游戏核心逻辑
+├─ styles/main.css   # 页面样式
 ├─ assets/           # 游戏图片资源
 ├─ example.html      # Phaser 示例页面（非主游戏）
 ├─ package.json      # 依赖定义（http-server）
 └─ readme.txt        # 原始简要说明
 ```
 
-## 关键可调参数（index.html）
+## 关键可调参数（scripts/game.js）
 
 - `flowerScaleValues`：花朵各阶段缩放比例
 - `flowerCycleSeconds`：完整生长周期（秒）
