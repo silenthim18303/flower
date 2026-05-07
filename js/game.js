@@ -1,0 +1,151 @@
+(function() {
+    var cfg = window.FLOWER_CONFIG;
+    var state = window.FlowerState;
+    var stateService = window.FlowerStateService;
+    var ui = window.FlowerUI;
+
+    var game = new Phaser.Game(360, 640, Phaser.AUTO, '', {
+        preload: preload,
+        create: create,
+        update: update
+    });
+
+    function preload() {
+        game.load.image('background', 'img/背景/背景.png');
+        game.load.image('pot', 'img/背景/花盆.png');
+        game.load.image('house', 'img/背景/房子.png');
+
+        for (var i = 0; i < cfg.FLOWER_TYPES.length; i++) {
+            var flower = cfg.FLOWER_TYPES[i];
+            for (var stage = 1; stage <= 5; stage++) {
+                game.load.image(flower.id + stage, 'img/' + flower.folder + '/' + stage + '.png');
+            }
+        }
+    }
+
+    function create() {
+        game.scale.scaleMode = Phaser.ScaleManager.RESIZE;
+        game.scale.pageAlignHorizontally = true;
+        game.scale.pageAlignVertically = true;
+        game.scale.refresh();
+
+        var bg = game.add.sprite(0, 0, 'background');
+        function resizeBackground() {
+            var img = game.cache.getImage('background');
+            var scaleX = game.width / img.width;
+            var scaleY = game.height / img.height;
+            var scale = Math.max(scaleX, scaleY);
+            bg.scale.setTo(scale);
+            bg.x = (game.width - bg.width) / 2;
+            bg.y = (game.height - bg.height) / 2;
+        }
+        resizeBackground();
+        game.scale.onSizeChange.add(resizeBackground, this);
+
+        var house = game.add.sprite(0, 0, 'house');
+        house.anchor.setTo(0.5, 0.5);
+        function positionHouse() {
+            var houseImg = game.cache.getImage('house');
+            var houseScale = (game.width / 1.5) / houseImg.width;
+            house.scale.setTo(houseScale);
+            house.x = game.width / 2;
+            house.y = game.height * 2 / 5;
+        }
+        positionHouse();
+        game.scale.onSizeChange.add(positionHouse, this);
+
+        stateService.loadProgress();
+        ui.ensureUI();
+        ui.setSeedSelectHandler(function(flowerId) {
+            state.selectedFlowerType = flowerId;
+            ui.render(state);
+            stateService.saveProgress();
+        });
+
+        function applyUnlockedStateToPots() {
+            for (var i = 0; i < state.flowerPots.length; i++) {
+                state.flowerPots[i].setOperable(i < state.unlockedPotCount);
+            }
+        }
+
+        function updateAllPots() {
+            for (var i = 0; i < state.flowerPots.length; i++) {
+                state.flowerPots[i].updatePosition();
+            }
+        }
+
+        function handleCollect(flowerTypeId, count) {
+            var typeId = flowerTypeId || cfg.DEFAULT_FLOWER_TYPE;
+            if (typeof state.warehouse[typeId] !== 'number') {
+                state.warehouse[typeId] = 0;
+            }
+            state.warehouse[typeId] += count;
+            window.updateExp(count * cfg.EXP_PER_FLOWER);
+        }
+
+        window.updateExp = function(gain) {
+            if (state.level >= cfg.MAX_LEVEL) {
+                state.level = cfg.MAX_LEVEL;
+                state.exp = state.maxExp;
+                state.unlockedPotCount = cfg.TOTAL_POTS;
+                applyUnlockedStateToPots();
+                ui.render(state);
+                stateService.saveProgress();
+                return;
+            }
+
+            state.exp += gain;
+
+            while (state.exp >= state.maxExp && state.level < cfg.MAX_LEVEL) {
+                state.exp -= state.maxExp;
+                state.level++;
+
+                if (state.unlockedPotCount < cfg.TOTAL_POTS) {
+                    state.unlockedPotCount++;
+                    var unlockedIndex = state.unlockedPotCount - 1;
+                    if (state.flowerPots[unlockedIndex]) {
+                        state.flowerPots[unlockedIndex].setOperable(true);
+                    }
+                }
+
+                if (state.level >= cfg.MAX_LEVEL) {
+                    state.level = cfg.MAX_LEVEL;
+                    state.exp = state.maxExp;
+                    state.unlockedPotCount = cfg.TOTAL_POTS;
+                    applyUnlockedStateToPots();
+                    ui.showLevelUpToast(state.level, true);
+                    break;
+                }
+
+                ui.showLevelUpToast(state.level, false);
+            }
+
+            ui.render(state);
+            stateService.saveProgress();
+        };
+
+        var rows = 5;
+        var cols = 4;
+        for (var r = 0; r < rows; r++) {
+            for (var c = 0; c < cols; c++) {
+                var pot = new FlowerPot(game, r, c, r * cols + c, {
+                    onCollect: handleCollect,
+                    getSelectedFlowerType: function() {
+                        return state.selectedFlowerType;
+                    }
+                });
+                state.flowerPots.push(pot);
+            }
+        }
+
+        applyUnlockedStateToPots();
+        updateAllPots();
+        ui.render(state);
+        stateService.saveProgress();
+
+        game.scale.onSizeChange.add(updateAllPots, this);
+    }
+
+    function update() {
+    }
+})();
