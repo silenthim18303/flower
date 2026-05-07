@@ -77,6 +77,8 @@
             var sprite = this.group.create(0, 0, this.growthStages[i]);
             sprite.visible = false;
             sprite.anchor.setTo(0.5, 0.5);
+            sprite.inputEnabled = true;
+            sprite.events.onInputDown.add(this.handleClick, this);
 
             var scaleFactor = this.stageScaleFactors[i];
             sprite.scale.setTo(-potScale * scaleFactor, potScale * scaleFactor);
@@ -109,6 +111,36 @@
         this.currentStage++;
         this.syncStageTransforms();
         this.showStageSafely(this.currentStage);
+    };
+
+    FlowerPot.prototype.growToNextStage = function() {
+        if (this.currentStage < 0 || this.currentStage >= this.growthStages.length - 1) {
+            return false;
+        }
+
+        this.stageSprites[this.currentStage].visible = false;
+        this.currentStage++;
+        this.syncStageTransforms();
+        this.showStageSafely(this.currentStage);
+
+        if (this.currentStage >= this.growthStages.length - 1) {
+            this.stopGrowing();
+        }
+
+        return true;
+    };
+
+    FlowerPot.prototype.growToFinalStage = function() {
+        if (this.currentStage < 0 || this.currentStage >= this.growthStages.length - 1) {
+            return false;
+        }
+
+        this.stageSprites[this.currentStage].visible = false;
+        this.currentStage = this.growthStages.length - 1;
+        this.syncStageTransforms();
+        this.showStageSafely(this.currentStage);
+        this.stopGrowing();
+        return true;
     };
 
     FlowerPot.prototype.stopGrowing = function() {

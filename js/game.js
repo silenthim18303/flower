@@ -44,6 +44,11 @@
 
         var house = game.add.sprite(0, 0, 'house');
         house.anchor.setTo(0.5, 0.5);
+        house.inputEnabled = true;
+        house.input.useHandCursor = true;
+        house.events.onInputDown.add(function() {
+            ui.showCollectModal(state);
+        });
         function positionHouse() {
             var houseImg = game.cache.getImage('house');
             var houseScale = (game.width / 1.5) / houseImg.width;
@@ -60,6 +65,51 @@
             state.selectedFlowerType = flowerId;
             ui.render(state);
             stateService.saveProgress();
+        });
+        ui.setTradeHandler(function() {
+            stateService.saveProgress();
+        });
+        ui.setQuickActionHandlers({
+            onFertilize: function() {
+                if (!state.tools || state.tools.fertilizer <= 0) {
+                    return;
+                }
+
+                var changed = false;
+                for (var i = 0; i < state.flowerPots.length; i++) {
+                    if (state.flowerPots[i].growToFinalStage()) {
+                        changed = true;
+                    }
+                }
+
+                if (!changed) {
+                    return;
+                }
+
+                state.tools.fertilizer--;
+                ui.render(state);
+                stateService.saveProgress();
+            },
+            onWater: function() {
+                if (!state.tools || state.tools.wateringCan <= 0) {
+                    return;
+                }
+
+                var changed = false;
+                for (var i = 0; i < state.flowerPots.length; i++) {
+                    if (state.flowerPots[i].growToNextStage()) {
+                        changed = true;
+                    }
+                }
+
+                if (!changed) {
+                    return;
+                }
+
+                state.tools.wateringCan--;
+                ui.render(state);
+                stateService.saveProgress();
+            }
         });
 
         function applyUnlockedStateToPots() {

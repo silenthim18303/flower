@@ -33,5 +33,19 @@ window.FLOWER_CONFIG = {
             folder: '牡丹',
             logo: 'img/牡丹/5.png'
         }
+    ],
+    TRADE_ITEMS: [
+        {
+            id: 'wateringCan',
+            name: '浇水壶',
+            cost: 50,
+            image: 'img/工具/浇水壶.png'
+        },
+        {
+            id: 'fertilizer',
+            name: '化肥',
+            cost: 100,
+            image: 'img/工具/肥料.png'
+        }
     ]
 };

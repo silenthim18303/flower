@@ -10,6 +10,13 @@
         return warehouse;
     }
 
+    function getDefaultTools() {
+        return {
+            wateringCan: 0,
+            fertilizer: 0
+        };
+    }
+
     var state = {
         warehouse: getDefaultWarehouse(),
         level: 1,
@@ -17,6 +24,7 @@
         maxExp: cfg.LEVEL_UP_EXP,
         unlockedPotCount: cfg.BASE_UNLOCKED_POTS,
         selectedFlowerType: cfg.DEFAULT_FLOWER_TYPE,
+        tools: getDefaultTools(),
         flowerPots: []
     };
 
@@ -52,6 +60,15 @@
             var value = parseInt(state.warehouse[id], 10);
             state.warehouse[id] = isNaN(value) ? 0 : Math.max(value, 0);
         }
+
+        if (!state.tools || typeof state.tools !== 'object') {
+            state.tools = getDefaultTools();
+        }
+
+        var wateringCanCount = parseInt(state.tools.wateringCan, 10);
+        var fertilizerCount = parseInt(state.tools.fertilizer, 10);
+        state.tools.wateringCan = isNaN(wateringCanCount) ? 0 : Math.max(wateringCanCount, 0);
+        state.tools.fertilizer = isNaN(fertilizerCount) ? 0 : Math.max(fertilizerCount, 0);
     }
 
     function loadProgress() {
@@ -97,6 +114,17 @@
                 state.selectedFlowerType = parsed.selectedFlowerType;
             }
 
+            if (parsed.tools && typeof parsed.tools === 'object') {
+                var loadedWateringCan = parseInt(parsed.tools.wateringCan, 10);
+                var loadedFertilizer = parseInt(parsed.tools.fertilizer, 10);
+                if (!isNaN(loadedWateringCan)) {
+                    state.tools.wateringCan = Math.max(loadedWateringCan, 0);
+                }
+                if (!isNaN(loadedFertilizer)) {
+                    state.tools.fertilizer = Math.max(loadedFertilizer, 0);
+                }
+            }
+
             var loadedUnlocked = parseInt(parsed.unlockedPotCount, 10);
             if (!isNaN(loadedUnlocked)) {
                 state.unlockedPotCount = loadedUnlocked;
@@ -117,7 +145,8 @@
                 warehouse: state.warehouse,
                 warehouseRose: state.warehouse.rose || 0,
                 selectedFlowerType: state.selectedFlowerType,
-                unlockedPotCount: state.unlockedPotCount
+                unlockedPotCount: state.unlockedPotCount,
+                tools: state.tools
             }));
         } catch (e) {
         }

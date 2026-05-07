@@ -9,12 +9,33 @@
         warehouseList: null,
         maxLevelText: null,
         levelUpToast: null,
-        seedToolbar: null
+        seedToolbar: null,
+        collectModal: null,
+        collectTotal: null,
+        collectClose: null,
+        tradeList: null,
+        tradeTip: null,
+        quickFertilizeBtn: null,
+        quickWaterBtn: null,
+        quickFertilizerCount: null,
+        quickWateringCount: null
     };
 
     var onSeedSelect = null;
+    var onTrade = null;
+    var onQuickFertilize = null;
+    var onQuickWater = null;
 
     var levelUpToastTimer = null;
+
+    function getTradeItemById(id) {
+        for (var i = 0; i < cfg.TRADE_ITEMS.length; i++) {
+            if (cfg.TRADE_ITEMS[i].id === id) {
+                return cfg.TRADE_ITEMS[i];
+            }
+        }
+        return null;
+    }
 
     function ensureUI() {
         var levelUI = document.getElementById('level-ui');
@@ -65,11 +86,84 @@
             document.body.appendChild(seedToolbar);
         }
 
+        var quickFertilizeBtn = document.getElementById('quick-fertilize-btn');
+        if (!quickFertilizeBtn) {
+            var fertilizerItem = getTradeItemById('fertilizer');
+            quickFertilizeBtn = document.createElement('button');
+            quickFertilizeBtn.id = 'quick-fertilize-btn';
+            quickFertilizeBtn.className = 'quick-action-btn quick-action-left';
+            quickFertilizeBtn.type = 'button';
+            quickFertilizeBtn.innerHTML =
+                '<img src="' + (fertilizerItem ? fertilizerItem.image : 'img/工具/肥料.png') + '" alt="一键施肥">' +
+                '<span class="quick-action-label">一键施肥</span>' +
+                '<span class="quick-action-count" id="quick-fertilizer-count">x0</span>';
+            quickFertilizeBtn.onclick = function() {
+                if (quickFertilizeBtn.disabled) {
+                    return;
+                }
+                if (typeof onQuickFertilize === 'function') {
+                    onQuickFertilize();
+                }
+            };
+            document.body.appendChild(quickFertilizeBtn);
+        }
+
+        var quickWaterBtn = document.getElementById('quick-water-btn');
+        if (!quickWaterBtn) {
+            var waterItem = getTradeItemById('wateringCan');
+            quickWaterBtn = document.createElement('button');
+            quickWaterBtn.id = 'quick-water-btn';
+            quickWaterBtn.className = 'quick-action-btn quick-action-right';
+            quickWaterBtn.type = 'button';
+            quickWaterBtn.innerHTML =
+                '<img src="' + (waterItem ? waterItem.image : 'img/工具/浇水壶.png') + '" alt="一键浇水">' +
+                '<span class="quick-action-label">一键浇水</span>' +
+                '<span class="quick-action-count" id="quick-watering-count">x0</span>';
+            quickWaterBtn.onclick = function() {
+                if (quickWaterBtn.disabled) {
+                    return;
+                }
+                if (typeof onQuickWater === 'function') {
+                    onQuickWater();
+                }
+            };
+            document.body.appendChild(quickWaterBtn);
+        }
+
         var levelUpToast = document.getElementById('levelup-toast');
         if (!levelUpToast) {
             levelUpToast = document.createElement('div');
             levelUpToast.id = 'levelup-toast';
             document.body.appendChild(levelUpToast);
+        }
+
+        var collectModal = document.getElementById('collect-modal');
+        if (!collectModal) {
+            collectModal = document.createElement('div');
+            collectModal.id = 'collect-modal';
+            collectModal.innerHTML = [
+                '<div class="collect-modal-mask" data-close="1"></div>',
+                '<div class="collect-modal-card">',
+                '  <div class="collect-modal-title">收花统计</div>',
+                '  <div class="collect-stat-card">',
+                '    <div class="collect-stat-label">累计收取花朵</div>',
+                '    <div class="collect-stat-value" id="collect-total">0 朵</div>',
+                '  </div>',
+                '  <div class="trade-title">道具交易</div>',
+                '  <div class="trade-list" id="trade-list"></div>',
+                '  <div class="trade-tip" id="trade-tip"></div>',
+                '  <button class="collect-close-btn" id="collect-close" type="button">关闭</button>',
+                '</div>'
+            ].join('');
+
+            collectModal.addEventListener('click', function(e) {
+                var target = e.target;
+                if (target && target.getAttribute('data-close') === '1') {
+                    hideCollectModal();
+                }
+            });
+
+            document.body.appendChild(collectModal);
         }
 
         refs.levelPill = document.getElementById('level-pill');
@@ -80,6 +174,141 @@
         refs.maxLevelText = document.getElementById('max-level-text');
         refs.levelUpToast = levelUpToast;
         refs.seedToolbar = seedToolbar;
+        refs.collectModal = collectModal;
+        refs.collectTotal = document.getElementById('collect-total');
+        refs.collectClose = document.getElementById('collect-close');
+        refs.tradeList = document.getElementById('trade-list');
+        refs.tradeTip = document.getElementById('trade-tip');
+        refs.quickFertilizeBtn = quickFertilizeBtn;
+        refs.quickWaterBtn = quickWaterBtn;
+        refs.quickFertilizerCount = document.getElementById('quick-fertilizer-count');
+        refs.quickWateringCount = document.getElementById('quick-watering-count');
+
+        if (refs.collectClose) {
+            refs.collectClose.onclick = hideCollectModal;
+        }
+
+        if (refs.tradeList) {
+            refs.tradeList.onclick = function(e) {
+                var target = e.target;
+                if (!target || !target.classList.contains('trade-action')) {
+                    return;
+                }
+                if (target.disabled) {
+                    return;
+                }
+                var toolId = target.getAttribute('data-tool-id');
+                if (toolId) {
+                    handleTrade(toolId);
+                }
+            };
+        }
+    }
+
+    function getCollectedTotal(state) {
+        var total = 0;
+        for (var i = 0; i < cfg.FLOWER_TYPES.length; i++) {
+            var flower = cfg.FLOWER_TYPES[i];
+            total += state.warehouse[flower.id] || 0;
+        }
+        return total;
+    }
+
+    function renderTradeList(state) {
+        if (!refs.tradeList) {
+            return;
+        }
+
+        var total = getCollectedTotal(state);
+        var html = [];
+        for (var i = 0; i < cfg.TRADE_ITEMS.length; i++) {
+            var item = cfg.TRADE_ITEMS[i];
+            var owned = (state.tools && state.tools[item.id]) || 0;
+            var disabled = total < item.cost;
+            html.push(
+                '<div class="trade-item">' +
+                '  <img class="trade-icon" src="' + item.image + '" alt="' + item.name + '">' +
+                '  <div class="trade-meta">' +
+                '    <div class="trade-name">' + item.name + '</div>' +
+                '    <div class="trade-desc">' + item.cost + ' 朵花 / 1个</div>' +
+                '    <div class="trade-owned">已拥有：' + owned + '</div>' +
+                '  </div>' +
+                '  <button class="trade-action" data-tool-id="' + item.id + '" type="button"' + (disabled ? ' disabled' : '') + '>兑换</button>' +
+                '</div>'
+            );
+        }
+
+        refs.tradeList.innerHTML = html.join('');
+    }
+
+    function spendFlowers(state, cost) {
+        var remain = cost;
+        for (var i = 0; i < cfg.FLOWER_TYPES.length; i++) {
+            var flowerId = cfg.FLOWER_TYPES[i].id;
+            var count = state.warehouse[flowerId] || 0;
+            if (count <= 0) {
+                continue;
+            }
+            var used = Math.min(count, remain);
+            state.warehouse[flowerId] = count - used;
+            remain -= used;
+            if (remain <= 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function setTradeTip(text, isSuccess) {
+        if (!refs.tradeTip) {
+            return;
+        }
+        refs.tradeTip.textContent = text;
+        refs.tradeTip.className = isSuccess ? 'trade-tip success' : 'trade-tip';
+    }
+
+    function handleTrade(toolId) {
+        var state = window.FlowerState;
+        if (!state) {
+            return;
+        }
+
+        var item = null;
+        for (var i = 0; i < cfg.TRADE_ITEMS.length; i++) {
+            if (cfg.TRADE_ITEMS[i].id === toolId) {
+                item = cfg.TRADE_ITEMS[i];
+                break;
+            }
+        }
+        if (!item) {
+            return;
+        }
+
+        var total = getCollectedTotal(state);
+        if (total < item.cost) {
+            setTradeTip('花朵不足，兑换' + item.name + '需要 ' + item.cost + ' 朵。', false);
+            return;
+        }
+
+        if (!state.tools || typeof state.tools !== 'object') {
+            state.tools = {};
+        }
+
+        if (!spendFlowers(state, item.cost)) {
+            setTradeTip('兑换失败，请重试。', false);
+            return;
+        }
+
+        var ownedCount = state.tools[item.id] || 0;
+        state.tools[item.id] = ownedCount + 1;
+
+        render(state);
+        renderTradeList(state);
+        setTradeTip('兑换成功：' + item.name + ' +1', true);
+
+        if (typeof onTrade === 'function') {
+            onTrade(item.id, state.tools[item.id]);
+        }
     }
 
     function renderSeedSelection(selectedFlowerType) {
@@ -119,6 +348,21 @@
         refs.warehouseList.innerHTML = rows.join('');
     }
 
+    function renderQuickActionButtons(state) {
+        if (!refs.quickFertilizeBtn || !refs.quickWaterBtn) {
+            return;
+        }
+
+        var fertilizerCount = (state.tools && state.tools.fertilizer) || 0;
+        var wateringCount = (state.tools && state.tools.wateringCan) || 0;
+
+        refs.quickFertilizerCount.textContent = 'x' + fertilizerCount;
+        refs.quickWateringCount.textContent = 'x' + wateringCount;
+
+        refs.quickFertilizeBtn.disabled = fertilizerCount <= 0;
+        refs.quickWaterBtn.disabled = wateringCount <= 0;
+    }
+
     function render(state) {
         if (!refs.levelPill) {
             ensureUI();
@@ -135,6 +379,12 @@
         renderWarehouseList(state);
         refs.maxLevelText.style.display = isMaxLevel ? 'block' : 'none';
         renderSeedSelection(state.selectedFlowerType);
+        renderQuickActionButtons(state);
+
+        if (refs.collectModal && refs.collectModal.classList.contains('show')) {
+            refs.collectTotal.textContent = getCollectedTotal(state) + ' 朵';
+            renderTradeList(state);
+        }
     }
 
     function showLevelUpToast(level, isMaxLevel) {
@@ -158,10 +408,41 @@
         }, 1800);
     }
 
+    function showCollectModal(state) {
+        if (!refs.collectModal) {
+            ensureUI();
+        }
+
+        if (!refs.collectModal || !refs.collectTotal) {
+            return;
+        }
+
+        refs.collectTotal.textContent = getCollectedTotal(state) + ' 朵';
+        renderTradeList(state);
+        setTradeTip('', false);
+        refs.collectModal.classList.add('show');
+    }
+
+    function hideCollectModal() {
+        if (!refs.collectModal) {
+            return;
+        }
+        refs.collectModal.classList.remove('show');
+    }
+
     window.FlowerUI = {
         ensureUI: ensureUI,
         render: render,
         showLevelUpToast: showLevelUpToast,
+        showCollectModal: showCollectModal,
+        hideCollectModal: hideCollectModal,
+        setTradeHandler: function(handler) {
+            onTrade = handler;
+        },
+        setQuickActionHandlers: function(handlers) {
+            onQuickFertilize = handlers && handlers.onFertilize;
+            onQuickWater = handlers && handlers.onWater;
+        },
         setSeedSelectHandler: function(handler) {
             onSeedSelect = handler;
         }
