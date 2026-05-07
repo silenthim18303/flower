@@ -354,6 +354,16 @@ body {
     top: 98px;
 }
 
+.quick-action-plant {
+    right: 10px;
+    top: 184px;
+}
+
+.quick-action-harvest {
+    right: 10px;
+    top: 270px;
+}
+
 .quick-action-btn img {
     width: 28px;
     height: 28px;
@@ -445,6 +455,16 @@ body {
     .quick-action-right {
         right: 8px;
         top: 88px;
+    }
+
+    .quick-action-plant {
+        right: 8px;
+        top: 166px;
+    }
+
+    .quick-action-harvest {
+        right: 8px;
+        top: 244px;
     }
 
     .seed-item {

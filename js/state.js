@@ -13,7 +13,9 @@
     function getDefaultTools() {
         return {
             wateringCan: 0,
-            fertilizer: 0
+            fertilizer: 0,
+            oneClickPlant: false,
+            oneClickHarvest: false
         };
     }
 
@@ -69,6 +71,9 @@
         var fertilizerCount = parseInt(state.tools.fertilizer, 10);
         state.tools.wateringCan = isNaN(wateringCanCount) ? 0 : Math.max(wateringCanCount, 0);
         state.tools.fertilizer = isNaN(fertilizerCount) ? 0 : Math.max(fertilizerCount, 0);
+
+        state.tools.oneClickPlant = !!state.tools.oneClickPlant;
+        state.tools.oneClickHarvest = !!state.tools.oneClickHarvest;
     }
 
     function loadProgress() {
@@ -123,6 +128,9 @@
                 if (!isNaN(loadedFertilizer)) {
                     state.tools.fertilizer = Math.max(loadedFertilizer, 0);
                 }
+
+                state.tools.oneClickPlant = !!parsed.tools.oneClickPlant;
+                state.tools.oneClickHarvest = !!parsed.tools.oneClickHarvest;
             }
 
             var loadedUnlocked = parseInt(parsed.unlockedPotCount, 10);

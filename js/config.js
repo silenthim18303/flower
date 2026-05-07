@@ -46,6 +46,20 @@ window.FLOWER_CONFIG = {
             name: '化肥',
             cost: 100,
             image: 'img/工具/肥料.png'
+        },
+        {
+            id: 'oneClickPlant',
+            name: '一键播种',
+            cost: 500,
+            image: 'img/工具/一键播种.png',
+            permanent: true
+        },
+        {
+            id: 'oneClickHarvest',
+            name: '一键采摘',
+            cost: 500,
+            image: 'img/工具/一键采摘.png',
+            permanent: true
         }
     ]
 };

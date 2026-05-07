@@ -143,6 +143,28 @@
         return true;
     };
 
+    FlowerPot.prototype.plantIfEmpty = function(flowerTypeId) {
+        if (!this.isOperable || this.currentStage !== -1) {
+            return false;
+        }
+
+        this.plantSeed(flowerTypeId || cfg.DEFAULT_FLOWER_TYPE);
+        return true;
+    };
+
+    FlowerPot.prototype.collectIfMature = function() {
+        if (!this.isOperable || this.currentStage < 0) {
+            return false;
+        }
+
+        if (this.currentStage !== this.growthStages.length - 1) {
+            return false;
+        }
+
+        this.collectFlower();
+        return true;
+    };
+
     FlowerPot.prototype.stopGrowing = function() {
         if (this.growthTimer) {
             this.growthTimer.stop();

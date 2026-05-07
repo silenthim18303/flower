@@ -17,14 +17,20 @@
         tradeTip: null,
         quickFertilizeBtn: null,
         quickWaterBtn: null,
+        quickPlantBtn: null,
+        quickHarvestBtn: null,
         quickFertilizerCount: null,
-        quickWateringCount: null
+        quickWateringCount: null,
+        quickPlantStatus: null,
+        quickHarvestStatus: null
     };
 
     var onSeedSelect = null;
     var onTrade = null;
     var onQuickFertilize = null;
     var onQuickWater = null;
+    var onQuickPlant = null;
+    var onQuickHarvest = null;
 
     var levelUpToastTimer = null;
 
@@ -130,6 +136,50 @@
             document.body.appendChild(quickWaterBtn);
         }
 
+        var quickPlantBtn = document.getElementById('quick-plant-btn');
+        if (!quickPlantBtn) {
+            var plantItem = getTradeItemById('oneClickPlant');
+            quickPlantBtn = document.createElement('button');
+            quickPlantBtn.id = 'quick-plant-btn';
+            quickPlantBtn.className = 'quick-action-btn quick-action-plant';
+            quickPlantBtn.type = 'button';
+            quickPlantBtn.innerHTML =
+                '<img src="' + (plantItem ? plantItem.image : 'img/工具/一键播种.png') + '" alt="一键播种">' +
+                '<span class="quick-action-label">一键播种</span>' +
+                '<span class="quick-action-count" id="quick-plant-status">未解锁</span>';
+            quickPlantBtn.onclick = function() {
+                if (quickPlantBtn.disabled) {
+                    return;
+                }
+                if (typeof onQuickPlant === 'function') {
+                    onQuickPlant();
+                }
+            };
+            document.body.appendChild(quickPlantBtn);
+        }
+
+        var quickHarvestBtn = document.getElementById('quick-harvest-btn');
+        if (!quickHarvestBtn) {
+            var harvestItem = getTradeItemById('oneClickHarvest');
+            quickHarvestBtn = document.createElement('button');
+            quickHarvestBtn.id = 'quick-harvest-btn';
+            quickHarvestBtn.className = 'quick-action-btn quick-action-harvest';
+            quickHarvestBtn.type = 'button';
+            quickHarvestBtn.innerHTML =
+                '<img src="' + (harvestItem ? harvestItem.image : 'img/工具/一键采摘.png') + '" alt="一键采摘">' +
+                '<span class="quick-action-label">一键采摘</span>' +
+                '<span class="quick-action-count" id="quick-harvest-status">未解锁</span>';
+            quickHarvestBtn.onclick = function() {
+                if (quickHarvestBtn.disabled) {
+                    return;
+                }
+                if (typeof onQuickHarvest === 'function') {
+                    onQuickHarvest();
+                }
+            };
+            document.body.appendChild(quickHarvestBtn);
+        }
+
         var levelUpToast = document.getElementById('levelup-toast');
         if (!levelUpToast) {
             levelUpToast = document.createElement('div');
@@ -181,8 +231,12 @@
         refs.tradeTip = document.getElementById('trade-tip');
         refs.quickFertilizeBtn = quickFertilizeBtn;
         refs.quickWaterBtn = quickWaterBtn;
+        refs.quickPlantBtn = quickPlantBtn;
+        refs.quickHarvestBtn = quickHarvestBtn;
         refs.quickFertilizerCount = document.getElementById('quick-fertilizer-count');
         refs.quickWateringCount = document.getElementById('quick-watering-count');
+        refs.quickPlantStatus = document.getElementById('quick-plant-status');
+        refs.quickHarvestStatus = document.getElementById('quick-harvest-status');
 
         if (refs.collectClose) {
             refs.collectClose.onclick = hideCollectModal;
@@ -224,16 +278,25 @@
         for (var i = 0; i < cfg.TRADE_ITEMS.length; i++) {
             var item = cfg.TRADE_ITEMS[i];
             var owned = (state.tools && state.tools[item.id]) || 0;
-            var disabled = total < item.cost;
+            var isPermanent = !!item.permanent;
+            var alreadyOwned = isPermanent && !!owned;
+            var disabled = alreadyOwned || total < item.cost;
+            var descText = isPermanent
+                ? item.cost + ' 朵花 / 永久解锁'
+                : item.cost + ' 朵花 / 1个';
+            var ownedText = isPermanent
+                ? '状态：' + (alreadyOwned ? '已解锁' : '未解锁')
+                : '已拥有：' + owned;
+            var actionText = alreadyOwned ? '已兑换' : '兑换';
             html.push(
                 '<div class="trade-item">' +
                 '  <img class="trade-icon" src="' + item.image + '" alt="' + item.name + '">' +
                 '  <div class="trade-meta">' +
                 '    <div class="trade-name">' + item.name + '</div>' +
-                '    <div class="trade-desc">' + item.cost + ' 朵花 / 1个</div>' +
-                '    <div class="trade-owned">已拥有：' + owned + '</div>' +
+                '    <div class="trade-desc">' + descText + '</div>' +
+                '    <div class="trade-owned">' + ownedText + '</div>' +
                 '  </div>' +
-                '  <button class="trade-action" data-tool-id="' + item.id + '" type="button"' + (disabled ? ' disabled' : '') + '>兑换</button>' +
+                '  <button class="trade-action" data-tool-id="' + item.id + '" type="button"' + (disabled ? ' disabled' : '') + '>' + actionText + '</button>' +
                 '</div>'
             );
         }
@@ -290,6 +353,11 @@
             return;
         }
 
+        if (item.permanent && state.tools[item.id]) {
+            setTradeTip(item.name + ' 已解锁，无法重复兑换。', false);
+            return;
+        }
+
         if (!state.tools || typeof state.tools !== 'object') {
             state.tools = {};
         }
@@ -299,12 +367,16 @@
             return;
         }
 
-        var ownedCount = state.tools[item.id] || 0;
-        state.tools[item.id] = ownedCount + 1;
+        if (item.permanent) {
+            state.tools[item.id] = true;
+        } else {
+            var ownedCount = state.tools[item.id] || 0;
+            state.tools[item.id] = ownedCount + 1;
+        }
 
         render(state);
         renderTradeList(state);
-        setTradeTip('兑换成功：' + item.name + ' +1', true);
+        setTradeTip(item.permanent ? ('兑换成功：' + item.name + ' 已永久解锁') : ('兑换成功：' + item.name + ' +1'), true);
 
         if (typeof onTrade === 'function') {
             onTrade(item.id, state.tools[item.id]);
@@ -349,18 +421,24 @@
     }
 
     function renderQuickActionButtons(state) {
-        if (!refs.quickFertilizeBtn || !refs.quickWaterBtn) {
+        if (!refs.quickFertilizeBtn || !refs.quickWaterBtn || !refs.quickPlantBtn || !refs.quickHarvestBtn) {
             return;
         }
 
         var fertilizerCount = (state.tools && state.tools.fertilizer) || 0;
         var wateringCount = (state.tools && state.tools.wateringCan) || 0;
+        var plantUnlocked = !!(state.tools && state.tools.oneClickPlant);
+        var harvestUnlocked = !!(state.tools && state.tools.oneClickHarvest);
 
         refs.quickFertilizerCount.textContent = 'x' + fertilizerCount;
         refs.quickWateringCount.textContent = 'x' + wateringCount;
+        refs.quickPlantStatus.textContent = plantUnlocked ? '已解锁' : '未解锁';
+        refs.quickHarvestStatus.textContent = harvestUnlocked ? '已解锁' : '未解锁';
 
         refs.quickFertilizeBtn.disabled = fertilizerCount <= 0;
         refs.quickWaterBtn.disabled = wateringCount <= 0;
+        refs.quickPlantBtn.disabled = !plantUnlocked;
+        refs.quickHarvestBtn.disabled = !harvestUnlocked;
     }
 
     function render(state) {
@@ -442,6 +520,8 @@
         setQuickActionHandlers: function(handlers) {
             onQuickFertilize = handlers && handlers.onFertilize;
             onQuickWater = handlers && handlers.onWater;
+            onQuickPlant = handlers && handlers.onPlant;
+            onQuickHarvest = handlers && handlers.onHarvest;
         },
         setSeedSelectHandler: function(handler) {
             onSeedSelect = handler;

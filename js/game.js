@@ -109,6 +109,44 @@
                 state.tools.wateringCan--;
                 ui.render(state);
                 stateService.saveProgress();
+            },
+            onPlant: function() {
+                if (!state.tools || !state.tools.oneClickPlant) {
+                    return;
+                }
+
+                var changed = false;
+                for (var i = 0; i < state.flowerPots.length; i++) {
+                    if (state.flowerPots[i].plantIfEmpty(state.selectedFlowerType)) {
+                        changed = true;
+                    }
+                }
+
+                if (!changed) {
+                    return;
+                }
+
+                ui.render(state);
+                stateService.saveProgress();
+            },
+            onHarvest: function() {
+                if (!state.tools || !state.tools.oneClickHarvest) {
+                    return;
+                }
+
+                var changed = false;
+                for (var i = 0; i < state.flowerPots.length; i++) {
+                    if (state.flowerPots[i].collectIfMature()) {
+                        changed = true;
+                    }
+                }
+
+                if (!changed) {
+                    return;
+                }
+
+                ui.render(state);
+                stateService.saveProgress();
             }
         });
 
