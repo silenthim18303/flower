@@ -31,7 +31,7 @@
             return { x: item.x, y: item.y };
         });
         this.stageScaleFactors = cfg.ROSE_STAGE_SCALE_FACTORS.slice();
-        this.growthTimer = null;
+        this.growthEvent = null;
         this.revealEvent = null;
 
         this.sprite.inputEnabled = true;
@@ -63,14 +63,26 @@
 
     FlowerPot.prototype.plantSeed = function(flowerTypeId) {
         this.currentFlowerType = flowerTypeId || cfg.DEFAULT_FLOWER_TYPE;
-        this.growthStages = [
-            this.currentFlowerType + '1',
-            this.currentFlowerType + '2',
-            this.currentFlowerType + '3',
-            this.currentFlowerType + '4',
-            this.currentFlowerType + '5'
-        ];
+        this.growthStages = this.buildGrowthStageKeys(this.currentFlowerType);
+        this.createStageSprites();
 
+        this.syncStageTransforms();
+        this.currentStage = 0;
+        this.showStageSafely(0);
+        this.startGrowing();
+    };
+
+    FlowerPot.prototype.buildGrowthStageKeys = function(flowerTypeId) {
+        return [
+            flowerTypeId + '1',
+            flowerTypeId + '2',
+            flowerTypeId + '3',
+            flowerTypeId + '4',
+            flowerTypeId + '5'
+        ];
+    };
+
+    FlowerPot.prototype.createStageSprites = function() {
         var potScale = (this.game.width / 6) / this.potOriginalWidth;
 
         for (var i = 0; i < this.growthStages.length; i++) {
@@ -88,17 +100,22 @@
             sprite.y = offset.y;
             this.stageSprites.push(sprite);
         }
-
-        this.syncStageTransforms();
-        this.currentStage = 0;
-        this.showStageSafely(0);
-        this.startGrowing();
     };
 
     FlowerPot.prototype.startGrowing = function() {
-        this.growthTimer = this.game.time.create(false);
-        this.growthTimer.loop(10000, this.advanceGrowth, this);
-        this.growthTimer.start();
+        var delay = this.getRandomGrowthDelay();
+        this.growthEvent = this.game.time.events.add(delay, function() {
+            this.growthEvent = null;
+            this.advanceGrowth();
+
+            if (this.currentStage >= 0 && this.currentStage < this.growthStages.length - 1) {
+                this.startGrowing();
+            }
+        }, this);
+    };
+
+    FlowerPot.prototype.getRandomGrowthDelay = function() {
+        return this.game.rnd.integerInRange(10000, 15000);
     };
 
     FlowerPot.prototype.advanceGrowth = function() {
@@ -106,6 +123,8 @@
             this.stopGrowing();
             return;
         }
+
+        this.tryMutateToGolden();
 
         this.stageSprites[this.currentStage].visible = false;
         this.currentStage++;
@@ -117,6 +136,8 @@
         if (this.currentStage < 0 || this.currentStage >= this.growthStages.length - 1) {
             return false;
         }
+
+        this.tryMutateToGolden();
 
         this.stageSprites[this.currentStage].visible = false;
         this.currentStage++;
@@ -134,6 +155,8 @@
         if (this.currentStage < 0 || this.currentStage >= this.growthStages.length - 1) {
             return false;
         }
+
+        this.tryMutateToGolden();
 
         this.stageSprites[this.currentStage].visible = false;
         this.currentStage = this.growthStages.length - 1;
@@ -166,24 +189,37 @@
     };
 
     FlowerPot.prototype.stopGrowing = function() {
-        if (this.growthTimer) {
-            this.growthTimer.stop();
-            this.growthTimer.destroy();
-            this.growthTimer = null;
+        if (this.growthEvent) {
+            this.game.time.events.remove(this.growthEvent);
+            this.growthEvent = null;
         }
     };
 
     FlowerPot.prototype.collectFlower = function() {
+        var mutationCfg = cfg.MUTATION || {};
+        var peonyTypeId = mutationCfg.peonyTypeId || 'peony';
+        var goldenTypeId = mutationCfg.goldenTypeId || 'golden';
+
+        if (this.currentFlowerType === goldenTypeId) {
+            if (typeof this.onCollect === 'function') {
+                this.onCollect(peonyTypeId, 10);
+                this.onCollect(goldenTypeId, 1);
+            }
+            this.showCollectTip('+10朵牡丹 +1朵金花');
+            this.resetPot();
+            return;
+        }
+
         var count = Math.floor(Math.random() * 3) + 1;
         if (typeof this.onCollect === 'function') {
             this.onCollect(this.currentFlowerType || cfg.DEFAULT_FLOWER_TYPE, count);
         }
-        this.showCollectTip(count);
+        this.showCollectTip('+' + count + '朵花');
         this.resetPot();
     };
 
-    FlowerPot.prototype.showCollectTip = function(count) {
-        var tipText = this.game.add.text(this.group.x, this.group.y - 70, '+' + count + '朵花', {
+    FlowerPot.prototype.showCollectTip = function(text) {
+        var tipText = this.game.add.text(this.group.x, this.group.y - 70, text, {
             font: 'bold 20px Microsoft YaHei',
             fill: '#fff5d6',
             stroke: '#2a5d2f',
@@ -199,6 +235,44 @@
         tween.onComplete.add(function() {
             tipText.destroy();
         });
+    };
+
+    FlowerPot.prototype.tryMutateToGolden = function() {
+        var mutationCfg = cfg.MUTATION || {};
+        var peonyTypeId = mutationCfg.peonyTypeId || 'peony';
+        var goldenTypeId = mutationCfg.goldenTypeId || 'golden';
+        var chance = mutationCfg.peonyToGoldenChance || 0;
+
+        if (this.currentFlowerType !== peonyTypeId) {
+            return;
+        }
+
+        if (this.currentStage < 0 || this.currentStage >= this.growthStages.length - 1) {
+            return;
+        }
+
+        if (Math.random() >= chance) {
+            return;
+        }
+
+        this.mutateFlowerType(goldenTypeId);
+    };
+
+    FlowerPot.prototype.mutateFlowerType = function(nextFlowerTypeId) {
+        var stageIndex = this.currentStage;
+
+        for (var i = 0; i < this.stageSprites.length; i++) {
+            this.stageSprites[i].destroy();
+        }
+
+        this.stageSprites = [];
+        this.currentFlowerType = nextFlowerTypeId;
+        this.growthStages = this.buildGrowthStageKeys(nextFlowerTypeId);
+        this.createStageSprites();
+
+        this.currentStage = Math.min(stageIndex, this.growthStages.length - 1);
+        this.syncStageTransforms();
+        this.showStageSafely(this.currentStage);
     };
 
     FlowerPot.prototype.resetPot = function() {

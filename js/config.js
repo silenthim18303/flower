@@ -5,6 +5,19 @@ window.FLOWER_CONFIG = {
     MAX_LEVEL: 17,
     LEVEL_UP_EXP: 100,
     EXP_PER_FLOWER: 5,
+    // 金花出现概率
+    MUTATION: {
+        peonyToGoldenChance: 0.05,
+        peonyTypeId: 'peony',
+        goldenTypeId: 'golden'
+    },
+    DAILY_TASK: {
+        collectGoal: 30,
+        reward: {
+            fertilizer: 1,
+            wateringCan: 0
+        }
+    },
     ROSE_STAGE_OFFSETS: [
         { x: 0, y: -33 },
         { x: 0, y: -35 },
@@ -32,6 +45,13 @@ window.FLOWER_CONFIG = {
             name: '牡丹',
             folder: '牡丹',
             logo: 'img/牡丹/5.png'
+        },
+        {
+            id: 'golden',
+            name: '金花',
+            folder: '金花',
+            logo: 'img/金花/5.png',
+            seedSelectable: false
         }
     ],
     TRADE_ITEMS: [

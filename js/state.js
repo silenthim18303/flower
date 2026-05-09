@@ -1,6 +1,13 @@
 (function() {
     var cfg = window.FLOWER_CONFIG;
     var flowerTypeIds = cfg.FLOWER_TYPES.map(function(item) { return item.id; });
+    var seedSelectableTypeIds = cfg.FLOWER_TYPES
+        .filter(function(item) {
+            return item.seedSelectable !== false;
+        })
+        .map(function(item) {
+            return item.id;
+        });
 
     function getDefaultWarehouse() {
         var warehouse = {};
@@ -19,6 +26,27 @@
         };
     }
 
+    function getTodayKey() {
+        var now = new Date();
+        var month = (now.getMonth() + 1).toString();
+        var day = now.getDate().toString();
+        if (month.length < 2) {
+            month = '0' + month;
+        }
+        if (day.length < 2) {
+            day = '0' + day;
+        }
+        return now.getFullYear() + '-' + month + '-' + day;
+    }
+
+    function getDefaultDailyTask() {
+        return {
+            dateKey: getTodayKey(),
+            collectProgress: 0,
+            rewardClaimed: false
+        };
+    }
+
     var state = {
         warehouse: getDefaultWarehouse(),
         level: 1,
@@ -27,6 +55,7 @@
         unlockedPotCount: cfg.BASE_UNLOCKED_POTS,
         selectedFlowerType: cfg.DEFAULT_FLOWER_TYPE,
         tools: getDefaultTools(),
+        dailyTask: getDefaultDailyTask(),
         flowerPots: []
     };
 
@@ -49,7 +78,7 @@
             state.exp = Math.min(Math.max(state.exp, 0), state.maxExp - 1);
         }
 
-        if (flowerTypeIds.indexOf(state.selectedFlowerType) === -1) {
+        if (seedSelectableTypeIds.indexOf(state.selectedFlowerType) === -1) {
             state.selectedFlowerType = cfg.DEFAULT_FLOWER_TYPE;
         }
 
@@ -74,6 +103,19 @@
 
         state.tools.oneClickPlant = !!state.tools.oneClickPlant;
         state.tools.oneClickHarvest = !!state.tools.oneClickHarvest;
+
+        if (!state.dailyTask || typeof state.dailyTask !== 'object') {
+            state.dailyTask = getDefaultDailyTask();
+        }
+
+        var todayKey = getTodayKey();
+        if (state.dailyTask.dateKey !== todayKey) {
+            state.dailyTask = getDefaultDailyTask();
+        }
+
+        var collectProgress = parseInt(state.dailyTask.collectProgress, 10);
+        state.dailyTask.collectProgress = isNaN(collectProgress) ? 0 : Math.max(collectProgress, 0);
+        state.dailyTask.rewardClaimed = !!state.dailyTask.rewardClaimed;
     }
 
     function loadProgress() {
@@ -133,6 +175,19 @@
                 state.tools.oneClickHarvest = !!parsed.tools.oneClickHarvest;
             }
 
+            if (parsed.dailyTask && typeof parsed.dailyTask === 'object') {
+                state.dailyTask.dateKey = typeof parsed.dailyTask.dateKey === 'string'
+                    ? parsed.dailyTask.dateKey
+                    : state.dailyTask.dateKey;
+
+                var loadedProgress = parseInt(parsed.dailyTask.collectProgress, 10);
+                if (!isNaN(loadedProgress)) {
+                    state.dailyTask.collectProgress = Math.max(loadedProgress, 0);
+                }
+
+                state.dailyTask.rewardClaimed = !!parsed.dailyTask.rewardClaimed;
+            }
+
             var loadedUnlocked = parseInt(parsed.unlockedPotCount, 10);
             if (!isNaN(loadedUnlocked)) {
                 state.unlockedPotCount = loadedUnlocked;
@@ -154,7 +209,8 @@
                 warehouseRose: state.warehouse.rose || 0,
                 selectedFlowerType: state.selectedFlowerType,
                 unlockedPotCount: state.unlockedPotCount,
-                tools: state.tools
+                tools: state.tools,
+                dailyTask: state.dailyTask
             }));
         } catch (e) {
         }

@@ -7,6 +7,12 @@
         expText: null,
         expPercent: null,
         warehouseList: null,
+        dailyTaskCard: null,
+        dailyTaskProgress: null,
+        dailyTaskModal: null,
+        dailyTaskModalText: null,
+        dailyTaskModalClaimBtn: null,
+        dailyTaskModalClose: null,
         maxLevelText: null,
         levelUpToast: null,
         seedToolbar: null,
@@ -27,12 +33,24 @@
 
     var onSeedSelect = null;
     var onTrade = null;
+    var onDailyTaskClaim = null;
     var onQuickFertilize = null;
     var onQuickWater = null;
     var onQuickPlant = null;
     var onQuickHarvest = null;
 
     var levelUpToastTimer = null;
+
+    function getSeedFlowerTypes() {
+        var list = [];
+        for (var i = 0; i < cfg.FLOWER_TYPES.length; i++) {
+            if (cfg.FLOWER_TYPES[i].seedSelectable === false) {
+                continue;
+            }
+            list.push(cfg.FLOWER_TYPES[i]);
+        }
+        return list;
+    }
 
     function getTradeItemById(id) {
         for (var i = 0; i < cfg.TRADE_ITEMS.length; i++) {
@@ -69,13 +87,30 @@
             document.body.appendChild(levelUI);
         }
 
+        var dailyTaskCard = document.getElementById('daily-task-card');
+        if (!dailyTaskCard) {
+            dailyTaskCard = document.createElement('button');
+            dailyTaskCard.id = 'daily-task-card';
+            dailyTaskCard.className = 'quick-action-btn daily-task-card';
+            dailyTaskCard.type = 'button';
+            dailyTaskCard.innerHTML =
+                '<span class="daily-task-label">每日任务</span>' +
+                '<span class="daily-task-progress" id="daily-task-progress">0/0</span>';
+            dailyTaskCard.onclick = function() {
+                showDailyTaskModal(window.FlowerState);
+            };
+            document.body.appendChild(dailyTaskCard);
+        }
+
         var seedToolbar = document.getElementById('seed-toolbar');
         if (!seedToolbar) {
             seedToolbar = document.createElement('div');
             seedToolbar.id = 'seed-toolbar';
 
-            for (var i = 0; i < cfg.FLOWER_TYPES.length; i++) {
-                var flower = cfg.FLOWER_TYPES[i];
+            var seedFlowers = getSeedFlowerTypes();
+
+            for (var i = 0; i < seedFlowers.length; i++) {
+                var flower = seedFlowers[i];
                 var item = document.createElement('div');
                 item.className = 'seed-item';
                 item.setAttribute('data-flower-id', flower.id);
@@ -216,11 +251,41 @@
             document.body.appendChild(collectModal);
         }
 
+        var dailyTaskModal = document.getElementById('daily-task-modal');
+        if (!dailyTaskModal) {
+            dailyTaskModal = document.createElement('div');
+            dailyTaskModal.id = 'daily-task-modal';
+            dailyTaskModal.innerHTML = [
+                '<div class="daily-task-modal-mask" data-close="1"></div>',
+                '<div class="daily-task-modal-card">',
+                '  <div class="daily-task-modal-title">每日任务</div>',
+                '  <div class="daily-task-modal-text" id="daily-task-modal-text">收花 0/0 朵</div>',
+                '  <button class="daily-task-modal-claim" id="daily-task-modal-claim" type="button">进行中</button>',
+                '  <button class="daily-task-modal-close" id="daily-task-modal-close" type="button">关闭</button>',
+                '</div>'
+            ].join('');
+
+            dailyTaskModal.addEventListener('click', function(e) {
+                var target = e.target;
+                if (target && target.getAttribute('data-close') === '1') {
+                    hideDailyTaskModal();
+                }
+            });
+
+            document.body.appendChild(dailyTaskModal);
+        }
+
         refs.levelPill = document.getElementById('level-pill');
         refs.expFill = document.getElementById('exp-fill');
         refs.expText = document.getElementById('exp-text');
         refs.expPercent = document.getElementById('exp-percent');
         refs.warehouseList = document.getElementById('warehouse-list');
+        refs.dailyTaskCard = dailyTaskCard;
+        refs.dailyTaskProgress = document.getElementById('daily-task-progress');
+        refs.dailyTaskModal = dailyTaskModal;
+        refs.dailyTaskModalText = document.getElementById('daily-task-modal-text');
+        refs.dailyTaskModalClaimBtn = document.getElementById('daily-task-modal-claim');
+        refs.dailyTaskModalClose = document.getElementById('daily-task-modal-close');
         refs.maxLevelText = document.getElementById('max-level-text');
         refs.levelUpToast = levelUpToast;
         refs.seedToolbar = seedToolbar;
@@ -240,6 +305,21 @@
 
         if (refs.collectClose) {
             refs.collectClose.onclick = hideCollectModal;
+        }
+
+        if (refs.dailyTaskModalClaimBtn) {
+            refs.dailyTaskModalClaimBtn.onclick = function() {
+                if (refs.dailyTaskModalClaimBtn.disabled) {
+                    return;
+                }
+                if (typeof onDailyTaskClaim === 'function') {
+                    onDailyTaskClaim();
+                }
+            };
+        }
+
+        if (refs.dailyTaskModalClose) {
+            refs.dailyTaskModalClose.onclick = hideDailyTaskModal;
         }
 
         if (refs.tradeList) {
@@ -420,6 +500,63 @@
         refs.warehouseList.innerHTML = rows.join('');
     }
 
+    function renderDailyTask(state) {
+        if (!refs.dailyTaskProgress || !refs.dailyTaskModalText || !refs.dailyTaskModalClaimBtn) {
+            return;
+        }
+
+        var taskCfg = cfg.DAILY_TASK || {};
+        var goal = taskCfg.collectGoal || 0;
+        var progress = state.dailyTask ? (state.dailyTask.collectProgress || 0) : 0;
+        var clampedProgress = Math.min(progress, goal);
+        var claimed = !!(state.dailyTask && state.dailyTask.rewardClaimed);
+        var reward = taskCfg.reward || {};
+        var rewardParts = [];
+        if (reward.fertilizer) {
+            rewardParts.push('化肥x' + reward.fertilizer);
+        }
+        if (reward.wateringCan) {
+            rewardParts.push('浇水壶x' + reward.wateringCan);
+        }
+        if (rewardParts.length === 0) {
+            rewardParts.push('无');
+        }
+
+        refs.dailyTaskProgress.textContent = clampedProgress + '/' + goal;
+        refs.dailyTaskModalText.textContent = '收花 ' + clampedProgress + '/' + goal + ' 朵（奖励：' + rewardParts.join('，') + '）';
+
+        if (claimed) {
+            refs.dailyTaskModalClaimBtn.textContent = '已领取';
+            refs.dailyTaskModalClaimBtn.disabled = true;
+            return;
+        }
+
+        var canClaim = clampedProgress >= goal && goal > 0;
+        refs.dailyTaskModalClaimBtn.textContent = canClaim ? '领取奖励' : '进行中';
+        refs.dailyTaskModalClaimBtn.disabled = !canClaim;
+    }
+
+    function showDailyTaskModal(state) {
+        if (!refs.dailyTaskModal) {
+            ensureUI();
+        }
+        if (!refs.dailyTaskModal) {
+            return;
+        }
+
+        if (state) {
+            renderDailyTask(state);
+        }
+        refs.dailyTaskModal.classList.add('show');
+    }
+
+    function hideDailyTaskModal() {
+        if (!refs.dailyTaskModal) {
+            return;
+        }
+        refs.dailyTaskModal.classList.remove('show');
+    }
+
     function renderQuickActionButtons(state) {
         if (!refs.quickFertilizeBtn || !refs.quickWaterBtn || !refs.quickPlantBtn || !refs.quickHarvestBtn) {
             return;
@@ -455,6 +592,7 @@
         refs.expText.textContent = displayExp + '/' + state.maxExp;
         refs.expPercent.textContent = isMaxLevel ? 'MAX' : Math.floor(expRatio * 100) + '%';
         renderWarehouseList(state);
+        renderDailyTask(state);
         refs.maxLevelText.style.display = isMaxLevel ? 'block' : 'none';
         renderSeedSelection(state.selectedFlowerType);
         renderQuickActionButtons(state);
@@ -516,6 +654,9 @@
         hideCollectModal: hideCollectModal,
         setTradeHandler: function(handler) {
             onTrade = handler;
+        },
+        setDailyTaskClaimHandler: function(handler) {
+            onDailyTaskClaim = handler;
         },
         setQuickActionHandlers: function(handlers) {
             onQuickFertilize = handlers && handlers.onFertilize;

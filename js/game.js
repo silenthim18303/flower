@@ -69,6 +69,29 @@
         ui.setTradeHandler(function() {
             stateService.saveProgress();
         });
+        ui.setDailyTaskClaimHandler(function() {
+            if (!state.dailyTask || state.dailyTask.rewardClaimed) {
+                return;
+            }
+
+            var taskCfg = cfg.DAILY_TASK || {};
+            var goal = taskCfg.collectGoal || 0;
+            if ((state.dailyTask.collectProgress || 0) < goal || goal <= 0) {
+                return;
+            }
+
+            var reward = taskCfg.reward || {};
+            if (!state.tools || typeof state.tools !== 'object') {
+                state.tools = {};
+            }
+
+            state.tools.fertilizer = (state.tools.fertilizer || 0) + (reward.fertilizer || 0);
+            state.tools.wateringCan = (state.tools.wateringCan || 0) + (reward.wateringCan || 0);
+            state.dailyTask.rewardClaimed = true;
+
+            ui.render(state);
+            stateService.saveProgress();
+        });
         ui.setQuickActionHandlers({
             onFertilize: function() {
                 if (!state.tools || state.tools.fertilizer <= 0) {
@@ -168,6 +191,15 @@
                 state.warehouse[typeId] = 0;
             }
             state.warehouse[typeId] += count;
+
+            if (state.dailyTask && !state.dailyTask.rewardClaimed) {
+                var taskGoal = (cfg.DAILY_TASK && cfg.DAILY_TASK.collectGoal) || 0;
+                var currentProgress = state.dailyTask.collectProgress || 0;
+                if (taskGoal > 0) {
+                    state.dailyTask.collectProgress = Math.min(currentProgress + count, taskGoal);
+                }
+            }
+
             window.updateExp(count * cfg.EXP_PER_FLOWER);
         }
 
