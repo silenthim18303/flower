@@ -5,6 +5,63 @@ body {
     background: #000;
 }
 
+#boot-loading {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    background: #090d14 url('../img/背景/加载背景.png') center center / cover no-repeat;
+    transition: opacity 280ms ease;
+}
+
+#boot-loading.is-hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#boot-loading .boot-loading-panel {
+    width: min(320px, calc(100vw - 32px));
+    margin-bottom: 30vh;
+    padding: 16px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(222, 231, 245, 0.95);
+    box-sizing: border-box;
+    font-family: "Microsoft YaHei", sans-serif;
+}
+
+#boot-loading .boot-loading-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #294265;
+}
+
+#boot-loading .boot-loading-progress-track {
+    margin-top: 10px;
+    width: 100%;
+    height: 10px;
+    border-radius: 999px;
+    background: #dce8f8;
+    overflow: hidden;
+}
+
+#boot-loading .boot-loading-progress-fill {
+    width: 0;
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #3f8df0 0%, #66b6ff 100%);
+    transition: width 120ms linear;
+}
+
+#boot-loading .boot-loading-progress-text {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #4c668b;
+    text-align: right;
+}
+
 #level-ui {
     position: fixed;
     top: 12px;
@@ -129,7 +186,7 @@ body {
     font-weight: 700;
 }
 
-.daily-task-card {
+.quick-action-btn.daily-task-card {
     right: 10px;
     top: 372px;
 }
@@ -215,6 +272,129 @@ body {
 }
 
 #daily-task-modal .daily-task-modal-close {
+    margin-top: 8px;
+    background: #e8eef8;
+    color: #466288;
+}
+
+#golden-exchange-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 41;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-family: "Microsoft YaHei", sans-serif;
+}
+
+#golden-exchange-modal.show {
+    display: flex;
+}
+
+#golden-exchange-modal .golden-exchange-mask {
+    position: absolute;
+    inset: 0;
+    background: rgba(11, 20, 35, 0.45);
+}
+
+#golden-exchange-modal .golden-exchange-card {
+    position: relative;
+    width: min(320px, calc(100vw - 36px));
+    border-radius: 18px;
+    padding: 18px 16px 14px;
+    box-sizing: border-box;
+    background: #ffffff;
+    border: 1px solid #dbe5f5;
+    box-shadow: 0 14px 32px rgba(9, 20, 40, 0.28);
+}
+
+#golden-exchange-modal .golden-exchange-title {
+    font-size: 17px;
+    color: #233652;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+#golden-exchange-modal .golden-exchange-desc,
+#golden-exchange-modal .golden-exchange-need {
+    font-size: 13px;
+    color: #4d6180;
+    line-height: 1.5;
+}
+
+#golden-exchange-modal .golden-exchange-need {
+    margin-top: 6px;
+}
+
+#golden-exchange-modal .golden-exchange-options {
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+#golden-exchange-modal .golden-exchange-item {
+    border: 1px solid #d9e5f8;
+    border-radius: 12px;
+    padding: 10px;
+    background: #f9fbff;
+}
+
+#golden-exchange-modal .golden-exchange-item-title {
+    color: #254064;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+#golden-exchange-modal .golden-exchange-item-need {
+    margin-top: 4px;
+    color: #5f7392;
+    font-size: 12px;
+}
+
+#golden-exchange-modal .golden-exchange-item-action {
+    margin-top: 8px;
+    width: 100%;
+    height: 34px;
+    border: none;
+    border-radius: 8px;
+    background: #2b78d6;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+#golden-exchange-modal .golden-exchange-item-action:disabled {
+    background: #b9c6d8;
+    color: #eef3f9;
+    cursor: not-allowed;
+}
+
+#golden-exchange-modal .golden-exchange-tip {
+    min-height: 20px;
+    margin-top: 8px;
+    font-size: 12px;
+    color: #9a3f3f;
+}
+
+#golden-exchange-modal .golden-exchange-tip.success {
+    color: #247648;
+}
+
+#golden-exchange-modal .golden-exchange-close {
+    margin-top: 12px;
+    width: 100%;
+    height: 38px;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+#golden-exchange-modal .golden-exchange-close {
     margin-top: 8px;
     background: #e8eef8;
     color: #466288;
@@ -505,6 +685,14 @@ body {
     line-height: 1;
 }
 
+.seed-item .seed-sub {
+    margin-top: 2px;
+    font-size: 11px;
+    color: #1f66bd;
+    line-height: 1;
+    font-weight: 700;
+}
+
 .seed-item.active {
     border-color: #5ea8ff;
     background: #e9f3ff;
@@ -558,7 +746,7 @@ body {
         top: 244px;
     }
 
-    .daily-task-card {
+    .quick-action-btn.daily-task-card {
         right: 8px;
         top: 332px;
     }

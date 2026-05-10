@@ -3,6 +3,12 @@
     var state = window.FlowerState;
     var stateService = window.FlowerStateService;
     var ui = window.FlowerUI;
+    var bootLoading = document.getElementById('boot-loading');
+    var bootLoadingProgressFill = document.getElementById('boot-loading-progress-fill');
+    var bootLoadingProgressText = document.getElementById('boot-loading-progress-text');
+    var MIN_BOOT_LOADING_MS = 1500;
+    var bootLoadingShownAt = Date.now();
+    var bootLoadingHideScheduled = false;
 
     var game = new Phaser.Game(360, 640, Phaser.AUTO, '', {
         preload: preload,
@@ -11,6 +17,9 @@
     });
 
     function preload() {
+        game.load.onFileComplete.add(updateBootLoadingProgress, this);
+        updateBootLoadingProgress(0);
+
         game.load.image('background', 'img/背景/背景.png');
         game.load.image('pot', 'img/背景/花盆.png');
         game.load.image('house', 'img/背景/房子.png');
@@ -21,6 +30,48 @@
                 game.load.image(flower.id + stage, 'img/' + flower.folder + '/' + stage + '.png');
             }
         }
+    }
+
+    function updateBootLoadingProgress(progress) {
+        if (!bootLoading) {
+            return;
+        }
+
+        var safeProgress = Math.max(0, Math.min(100, progress || 0));
+        if (bootLoadingProgressFill) {
+            bootLoadingProgressFill.style.width = safeProgress + '%';
+        }
+        if (bootLoadingProgressText) {
+            bootLoadingProgressText.textContent = Math.round(safeProgress) + '%';
+        }
+    }
+
+    function hideBootLoading() {
+        if (!bootLoading || bootLoadingHideScheduled) {
+            return;
+        }
+
+        bootLoadingHideScheduled = true;
+
+        var elapsed = Date.now() - bootLoadingShownAt;
+        var waitBeforeHide = Math.max(0, MIN_BOOT_LOADING_MS - elapsed);
+
+        setTimeout(function() {
+            if (!bootLoading) {
+                return;
+            }
+
+            updateBootLoadingProgress(100);
+            bootLoading.classList.add('is-hidden');
+            setTimeout(function() {
+                if (bootLoading && bootLoading.parentNode) {
+                    bootLoading.parentNode.removeChild(bootLoading);
+                }
+                bootLoading = null;
+                bootLoadingProgressFill = null;
+                bootLoadingProgressText = null;
+            }, 320);
+        }, waitBeforeHide);
     }
 
     function create() {
@@ -262,6 +313,7 @@
         updateAllPots();
         ui.render(state);
         stateService.saveProgress();
+        hideBootLoading();
 
         game.scale.onSizeChange.add(updateAllPots, this);
     }

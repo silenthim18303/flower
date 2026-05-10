@@ -21,6 +21,15 @@
         collectClose: null,
         tradeList: null,
         tradeTip: null,
+        goldenExchangeBtn: null,
+        goldenExchangeStatus: null,
+        goldenExchangeModal: null,
+        goldenExchangeRoseNeed: null,
+        goldenExchangeDaisyNeed: null,
+        goldenExchangeRoseAction: null,
+        goldenExchangeDaisyAction: null,
+        goldenExchangeTip: null,
+        goldenExchangeClose: null,
         quickFertilizeBtn: null,
         quickWaterBtn: null,
         quickPlantBtn: null,
@@ -40,6 +49,7 @@
     var onQuickHarvest = null;
 
     var levelUpToastTimer = null;
+    var GOLDEN_EXCHANGE_COST = 500;
 
     function getSeedFlowerTypes() {
         var list = [];
@@ -125,6 +135,44 @@
             }
 
             document.body.appendChild(seedToolbar);
+        }
+
+        var goldenExchangeBtn = document.getElementById('golden-exchange-btn');
+        if (!goldenExchangeBtn) {
+            goldenExchangeBtn = document.createElement('button');
+            goldenExchangeBtn.id = 'golden-exchange-btn';
+            goldenExchangeBtn.className = 'seed-item seed-golden-exchange';
+            goldenExchangeBtn.type = 'button';
+            goldenExchangeBtn.innerHTML =
+                '<img src="img/金花/5.png" alt="金花兑换">' +
+                '<div class="seed-name">金花兑换</div>' +
+                '<div class="seed-sub" id="golden-exchange-status">去兑换</div>';
+            goldenExchangeBtn.onclick = function() {
+                showGoldenExchangeModal(window.FlowerState);
+            };
+        }
+
+        if (goldenExchangeBtn.parentNode !== seedToolbar) {
+            seedToolbar.appendChild(goldenExchangeBtn);
+        }
+
+        var donateBtn = document.getElementById('donate-btn');
+        if (!donateBtn) {
+            donateBtn = document.createElement('button');
+            donateBtn.id = 'donate-btn';
+            donateBtn.className = 'seed-item seed-donate';
+            donateBtn.type = 'button';
+            donateBtn.innerHTML =
+                '<img src="img/金花/5.png" alt="去打赏">' +
+                '<div class="seed-name">送给明星</div>' +
+                '<div class="seed-sub">送给明星</div>';
+            donateBtn.onclick = function() {
+                window.location.href = 'donate.html';
+            };
+        }
+
+        if (donateBtn.parentNode !== seedToolbar) {
+            seedToolbar.appendChild(donateBtn);
         }
 
         var quickFertilizeBtn = document.getElementById('quick-fertilize-btn');
@@ -275,6 +323,42 @@
             document.body.appendChild(dailyTaskModal);
         }
 
+        var goldenExchangeModal = document.getElementById('golden-exchange-modal');
+        if (!goldenExchangeModal) {
+            goldenExchangeModal = document.createElement('div');
+            goldenExchangeModal.id = 'golden-exchange-modal';
+            goldenExchangeModal.innerHTML = [
+                '<div class="golden-exchange-mask" data-close="1"></div>',
+                '<div class="golden-exchange-card">',
+                '  <div class="golden-exchange-title">金花兑换</div>',
+                '  <div class="golden-exchange-desc">可任选一种花兑换：500朵玫瑰 或 500朵雏菊 = 1朵金花（牡丹不支持兑换）</div>',
+                '  <div class="golden-exchange-options">',
+                '    <div class="golden-exchange-item">',
+                '      <div class="golden-exchange-item-title">玫瑰兑换</div>',
+                '      <div class="golden-exchange-item-need" id="golden-exchange-rose-need">玫瑰: 0/500</div>',
+                '      <button class="golden-exchange-item-action" id="golden-exchange-rose-action" type="button">用500朵玫瑰兑换</button>',
+                '    </div>',
+                '    <div class="golden-exchange-item">',
+                '      <div class="golden-exchange-item-title">雏菊兑换</div>',
+                '      <div class="golden-exchange-item-need" id="golden-exchange-daisy-need">雏菊: 0/500</div>',
+                '      <button class="golden-exchange-item-action" id="golden-exchange-daisy-action" type="button">用500朵雏菊兑换</button>',
+                '    </div>',
+                '  </div>',
+                '  <div class="golden-exchange-tip" id="golden-exchange-tip"></div>',
+                '  <button class="golden-exchange-close" id="golden-exchange-close" type="button">关闭</button>',
+                '</div>'
+            ].join('');
+
+            goldenExchangeModal.addEventListener('click', function(e) {
+                var target = e.target;
+                if (target && target.getAttribute('data-close') === '1') {
+                    hideGoldenExchangeModal();
+                }
+            });
+
+            document.body.appendChild(goldenExchangeModal);
+        }
+
         refs.levelPill = document.getElementById('level-pill');
         refs.expFill = document.getElementById('exp-fill');
         refs.expText = document.getElementById('exp-text');
@@ -294,6 +378,15 @@
         refs.collectClose = document.getElementById('collect-close');
         refs.tradeList = document.getElementById('trade-list');
         refs.tradeTip = document.getElementById('trade-tip');
+        refs.goldenExchangeBtn = goldenExchangeBtn;
+        refs.goldenExchangeStatus = document.getElementById('golden-exchange-status');
+        refs.goldenExchangeModal = goldenExchangeModal;
+        refs.goldenExchangeRoseNeed = document.getElementById('golden-exchange-rose-need');
+        refs.goldenExchangeDaisyNeed = document.getElementById('golden-exchange-daisy-need');
+        refs.goldenExchangeRoseAction = document.getElementById('golden-exchange-rose-action');
+        refs.goldenExchangeDaisyAction = document.getElementById('golden-exchange-daisy-action');
+        refs.goldenExchangeTip = document.getElementById('golden-exchange-tip');
+        refs.goldenExchangeClose = document.getElementById('golden-exchange-close');
         refs.quickFertilizeBtn = quickFertilizeBtn;
         refs.quickWaterBtn = quickWaterBtn;
         refs.quickPlantBtn = quickPlantBtn;
@@ -320,6 +413,28 @@
 
         if (refs.dailyTaskModalClose) {
             refs.dailyTaskModalClose.onclick = hideDailyTaskModal;
+        }
+
+        if (refs.goldenExchangeRoseAction) {
+            refs.goldenExchangeRoseAction.onclick = function() {
+                if (refs.goldenExchangeRoseAction.disabled) {
+                    return;
+                }
+                handleGoldenExchange('rose');
+            };
+        }
+
+        if (refs.goldenExchangeDaisyAction) {
+            refs.goldenExchangeDaisyAction.onclick = function() {
+                if (refs.goldenExchangeDaisyAction.disabled) {
+                    return;
+                }
+                handleGoldenExchange('daisy');
+            };
+        }
+
+        if (refs.goldenExchangeClose) {
+            refs.goldenExchangeClose.onclick = hideGoldenExchangeModal;
         }
 
         if (refs.tradeList) {
@@ -557,6 +672,89 @@
         refs.dailyTaskModal.classList.remove('show');
     }
 
+    function canExchangeGoldenByType(state, flowerTypeId) {
+        if (!state || !state.warehouse) {
+            return false;
+        }
+        var count = state.warehouse[flowerTypeId] || 0;
+        return count >= GOLDEN_EXCHANGE_COST;
+    }
+
+    function setGoldenExchangeTip(text, isSuccess) {
+        if (!refs.goldenExchangeTip) {
+            return;
+        }
+        refs.goldenExchangeTip.textContent = text;
+        refs.goldenExchangeTip.className = isSuccess ? 'golden-exchange-tip success' : 'golden-exchange-tip';
+    }
+
+    function renderGoldenExchange(state) {
+        if (!refs.goldenExchangeBtn || !refs.goldenExchangeStatus || !refs.goldenExchangeRoseNeed || !refs.goldenExchangeDaisyNeed || !refs.goldenExchangeRoseAction || !refs.goldenExchangeDaisyAction) {
+            return;
+        }
+
+        var roseCount = (state.warehouse && state.warehouse.rose) || 0;
+        var daisyCount = (state.warehouse && state.warehouse.daisy) || 0;
+        var canRoseExchange = canExchangeGoldenByType(state, 'rose');
+        var canDaisyExchange = canExchangeGoldenByType(state, 'daisy');
+        var canAnyExchange = canRoseExchange || canDaisyExchange;
+
+        refs.goldenExchangeStatus.textContent = canAnyExchange ? '可兑换' : '去兑换';
+        refs.goldenExchangeRoseNeed.textContent = '玫瑰: ' + roseCount + '/' + GOLDEN_EXCHANGE_COST;
+        refs.goldenExchangeDaisyNeed.textContent = '雏菊: ' + daisyCount + '/' + GOLDEN_EXCHANGE_COST;
+        refs.goldenExchangeRoseAction.disabled = !canRoseExchange;
+        refs.goldenExchangeDaisyAction.disabled = !canDaisyExchange;
+    }
+
+    function showGoldenExchangeModal(state) {
+        if (!refs.goldenExchangeModal) {
+            ensureUI();
+        }
+        if (!refs.goldenExchangeModal) {
+            return;
+        }
+
+        if (state) {
+            renderGoldenExchange(state);
+        }
+        setGoldenExchangeTip('', false);
+        refs.goldenExchangeModal.classList.add('show');
+    }
+
+    function hideGoldenExchangeModal() {
+        if (!refs.goldenExchangeModal) {
+            return;
+        }
+        refs.goldenExchangeModal.classList.remove('show');
+    }
+
+    function handleGoldenExchange(flowerTypeId) {
+        var state = window.FlowerState;
+        if (!state || !state.warehouse) {
+            return;
+        }
+
+        if (flowerTypeId !== 'rose' && flowerTypeId !== 'daisy') {
+            return;
+        }
+
+        if (!canExchangeGoldenByType(state, flowerTypeId)) {
+            setGoldenExchangeTip((flowerTypeId === 'rose' ? '玫瑰' : '雏菊') + '数量不足，无法兑换。', false);
+            render(state);
+            return;
+        }
+
+        state.warehouse[flowerTypeId] = (state.warehouse[flowerTypeId] || 0) - GOLDEN_EXCHANGE_COST;
+        state.warehouse.golden = (state.warehouse.golden || 0) + 1;
+
+        render(state);
+        setGoldenExchangeTip('兑换成功：消耗' + (flowerTypeId === 'rose' ? '玫瑰' : '雏菊') + '500，金花 +1', true);
+
+        if (typeof onTrade === 'function') {
+            onTrade('goldenExchange', state.warehouse.golden);
+        }
+    }
+
     function renderQuickActionButtons(state) {
         if (!refs.quickFertilizeBtn || !refs.quickWaterBtn || !refs.quickPlantBtn || !refs.quickHarvestBtn) {
             return;
@@ -593,6 +791,7 @@
         refs.expPercent.textContent = isMaxLevel ? 'MAX' : Math.floor(expRatio * 100) + '%';
         renderWarehouseList(state);
         renderDailyTask(state);
+        renderGoldenExchange(state);
         refs.maxLevelText.style.display = isMaxLevel ? 'block' : 'none';
         renderSeedSelection(state.selectedFlowerType);
         renderQuickActionButtons(state);

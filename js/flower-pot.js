@@ -27,10 +27,8 @@
         this.currentStage = -1;
         this.currentFlowerType = null;
 
-        this.stageOffsets = cfg.ROSE_STAGE_OFFSETS.map(function(item) {
-            return { x: item.x, y: item.y };
-        });
         this.stageScaleFactors = cfg.ROSE_STAGE_SCALE_FACTORS.slice();
+        this.flowerTopOffsetRatio = 0.20;
         this.growthEvent = null;
         this.revealEvent = null;
 
@@ -95,9 +93,8 @@
             var scaleFactor = this.stageScaleFactors[i];
             sprite.scale.setTo(-potScale * scaleFactor, potScale * scaleFactor);
 
-            var offset = this.stageOffsets[i];
-            sprite.x = offset.x;
-            sprite.y = offset.y;
+            sprite.x = 0;
+            sprite.y = 0;
             this.stageSprites.push(sprite);
         }
     };
@@ -323,14 +320,17 @@
 
     FlowerPot.prototype.syncStageTransforms = function() {
         var potScale = (this.game.width / 6) / this.potOriginalWidth;
+        var potHeight = this.potOriginalHeight * potScale;
 
         for (var i = 0; i < this.stageSprites.length; i++) {
             var stageSprite = this.stageSprites[i];
-            var stageOffset = this.stageOffsets[i];
             var stageScaleFactor = this.stageScaleFactors[i];
-            stageSprite.x = stageOffset.x;
-            stageSprite.y = stageOffset.y;
             stageSprite.scale.setTo(-potScale * stageScaleFactor, potScale * stageScaleFactor);
+
+            var stageHeight = stageSprite.height;
+            var topOffset = potHeight * this.flowerTopOffsetRatio;
+            stageSprite.x = 0;
+            stageSprite.y = -(potHeight / 2) + topOffset - (stageHeight / 2);
         }
     };
 
