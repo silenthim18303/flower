@@ -22,7 +22,9 @@
 
         game.load.image('background', 'img/背景/背景.png');
         game.load.image('pot', 'img/背景/花盆.png');
+        game.load.image('potLocked', 'img/背景/未解锁花盆.png');
         game.load.image('house', 'img/背景/房子.png');
+        game.load.image('npcFarmer', 'img/npc/花农.png');
 
         for (var i = 0; i < cfg.FLOWER_TYPES.length; i++) {
             var flower = cfg.FLOWER_TYPES[i];
@@ -102,13 +104,36 @@
         });
         function positionHouse() {
             var houseImg = game.cache.getImage('house');
-            var houseScale = (game.width / 1.5) / houseImg.width;
+            var houseScale = (game.width / 1.2) / houseImg.width;
             house.scale.setTo(houseScale);
             house.x = game.width / 2;
             house.y = game.height * 2 / 5;
         }
         positionHouse();
         game.scale.onSizeChange.add(positionHouse, this);
+
+        var npcFarmer = game.add.sprite(0, 0, 'npcFarmer');
+        npcFarmer.anchor.setTo(0.5, 1);
+        npcFarmer.inputEnabled = true;
+        npcFarmer.input.useHandCursor = true;
+        npcFarmer.events.onInputDown.add(function() {
+            ui.showGoldenExchangeModal(state);
+        });
+
+        function positionFarmer() {
+            var npcImg = game.cache.getImage('npcFarmer');
+            if (!npcImg || !npcImg.width) {
+                return;
+            }
+
+            var npcScale = (game.width / 5.5) / npcImg.width;
+            npcFarmer.scale.setTo(npcScale);
+            npcFarmer.x = house.x - house.width * 0.5;
+            npcFarmer.y = house.y + house.height * 0.5;
+            game.world.bringToTop(npcFarmer);
+        }
+        positionFarmer();
+        game.scale.onSizeChange.add(positionFarmer, this);
 
         stateService.loadProgress();
         ui.ensureUI();

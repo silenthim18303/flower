@@ -6,8 +6,11 @@
         expFill: null,
         expText: null,
         expPercent: null,
+        warehouseCard: null,
+        warehouseToggle: null,
         warehouseList: null,
         dailyTaskCard: null,
+        stageDonateCard: null,
         dailyTaskProgress: null,
         dailyTaskModal: null,
         dailyTaskModalText: null,
@@ -18,11 +21,10 @@
         seedToolbar: null,
         collectModal: null,
         collectTotal: null,
+        collectDetailList: null,
         collectClose: null,
         tradeList: null,
         tradeTip: null,
-        goldenExchangeBtn: null,
-        goldenExchangeStatus: null,
         goldenExchangeModal: null,
         goldenExchangeRoseNeed: null,
         goldenExchangeDaisyNeed: null,
@@ -47,6 +49,7 @@
     var onQuickWater = null;
     var onQuickPlant = null;
     var onQuickHarvest = null;
+    var isWarehouseCollapsed = true;
 
     var levelUpToastTimer = null;
     var GOLDEN_EXCHANGE_COST = 500;
@@ -89,12 +92,23 @@
                 '  <span class="exp-percent" id="exp-percent">0%</span>',
                 '</div>',
                 '<div class="max-level-text" id="max-level-text">已满级，已解锁全部花盆</div>',
-                '<div class="warehouse-section">',
-                '  <div class="warehouse-title">仓库</div>',
-                '  <div class="warehouse-list" id="warehouse-list"></div>',
-                '</div>'
             ].join('');
             document.body.appendChild(levelUI);
+        }
+
+        var warehouseCard = document.getElementById('warehouse-card');
+        if (!warehouseCard) {
+            warehouseCard = document.createElement('div');
+            warehouseCard.id = 'warehouse-card';
+            warehouseCard.className = 'collapsed';
+            warehouseCard.innerHTML = [
+                '<button class="warehouse-toggle" id="warehouse-toggle" type="button">',
+                '  <span class="warehouse-title">仓库</span>',
+                '  <span class="warehouse-arrow" id="warehouse-arrow">▾</span>',
+                '</button>',
+                '<div class="warehouse-list" id="warehouse-list"></div>'
+            ].join('');
+            document.body.appendChild(warehouseCard);
         }
 
         var dailyTaskCard = document.getElementById('daily-task-card');
@@ -110,6 +124,22 @@
                 showDailyTaskModal(window.FlowerState);
             };
             document.body.appendChild(dailyTaskCard);
+        }
+
+        var stageDonateCard = document.getElementById('stage-donate-card');
+        if (!stageDonateCard) {
+            stageDonateCard = document.createElement('button');
+            stageDonateCard.id = 'stage-donate-card';
+            stageDonateCard.className = 'quick-action-btn stage-donate-card';
+            stageDonateCard.type = 'button';
+            stageDonateCard.innerHTML =
+                '<img src="img/npc/舞台.png" alt="送给明星">' +
+                '<span class="quick-action-label">送给明星</span>' +
+                '<span class="quick-action-count">进入舞台</span>';
+            stageDonateCard.onclick = function() {
+                window.location.href = 'donate.html';
+            };
+            document.body.appendChild(stageDonateCard);
         }
 
         var seedToolbar = document.getElementById('seed-toolbar');
@@ -135,44 +165,6 @@
             }
 
             document.body.appendChild(seedToolbar);
-        }
-
-        var goldenExchangeBtn = document.getElementById('golden-exchange-btn');
-        if (!goldenExchangeBtn) {
-            goldenExchangeBtn = document.createElement('button');
-            goldenExchangeBtn.id = 'golden-exchange-btn';
-            goldenExchangeBtn.className = 'seed-item seed-golden-exchange';
-            goldenExchangeBtn.type = 'button';
-            goldenExchangeBtn.innerHTML =
-                '<img src="img/金花/5.png" alt="金花兑换">' +
-                '<div class="seed-name">金花兑换</div>' +
-                '<div class="seed-sub" id="golden-exchange-status">去兑换</div>';
-            goldenExchangeBtn.onclick = function() {
-                showGoldenExchangeModal(window.FlowerState);
-            };
-        }
-
-        if (goldenExchangeBtn.parentNode !== seedToolbar) {
-            seedToolbar.appendChild(goldenExchangeBtn);
-        }
-
-        var donateBtn = document.getElementById('donate-btn');
-        if (!donateBtn) {
-            donateBtn = document.createElement('button');
-            donateBtn.id = 'donate-btn';
-            donateBtn.className = 'seed-item seed-donate';
-            donateBtn.type = 'button';
-            donateBtn.innerHTML =
-                '<img src="img/金花/5.png" alt="去打赏">' +
-                '<div class="seed-name">送给明星</div>' +
-                '<div class="seed-sub">送给明星</div>';
-            donateBtn.onclick = function() {
-                window.location.href = 'donate.html';
-            };
-        }
-
-        if (donateBtn.parentNode !== seedToolbar) {
-            seedToolbar.appendChild(donateBtn);
         }
 
         var quickFertilizeBtn = document.getElementById('quick-fertilize-btn');
@@ -282,6 +274,7 @@
                 '    <div class="collect-stat-label">累计收取花朵</div>',
                 '    <div class="collect-stat-value" id="collect-total">0 朵</div>',
                 '  </div>',
+                '  <div class="collect-detail-list" id="collect-detail-list"></div>',
                 '  <div class="trade-title">道具交易</div>',
                 '  <div class="trade-list" id="trade-list"></div>',
                 '  <div class="trade-tip" id="trade-tip"></div>',
@@ -330,7 +323,7 @@
             goldenExchangeModal.innerHTML = [
                 '<div class="golden-exchange-mask" data-close="1"></div>',
                 '<div class="golden-exchange-card">',
-                '  <div class="golden-exchange-title">金花兑换</div>',
+                '  <div class="golden-exchange-title">花农兑换</div>',
                 '  <div class="golden-exchange-desc">可任选一种花兑换：500朵玫瑰 或 500朵雏菊 = 1朵金花（牡丹不支持兑换）</div>',
                 '  <div class="golden-exchange-options">',
                 '    <div class="golden-exchange-item">',
@@ -363,8 +356,11 @@
         refs.expFill = document.getElementById('exp-fill');
         refs.expText = document.getElementById('exp-text');
         refs.expPercent = document.getElementById('exp-percent');
+        refs.warehouseCard = warehouseCard;
+        refs.warehouseToggle = document.getElementById('warehouse-toggle');
         refs.warehouseList = document.getElementById('warehouse-list');
         refs.dailyTaskCard = dailyTaskCard;
+        refs.stageDonateCard = stageDonateCard;
         refs.dailyTaskProgress = document.getElementById('daily-task-progress');
         refs.dailyTaskModal = dailyTaskModal;
         refs.dailyTaskModalText = document.getElementById('daily-task-modal-text');
@@ -375,11 +371,10 @@
         refs.seedToolbar = seedToolbar;
         refs.collectModal = collectModal;
         refs.collectTotal = document.getElementById('collect-total');
+        refs.collectDetailList = document.getElementById('collect-detail-list');
         refs.collectClose = document.getElementById('collect-close');
         refs.tradeList = document.getElementById('trade-list');
         refs.tradeTip = document.getElementById('trade-tip');
-        refs.goldenExchangeBtn = goldenExchangeBtn;
-        refs.goldenExchangeStatus = document.getElementById('golden-exchange-status');
         refs.goldenExchangeModal = goldenExchangeModal;
         refs.goldenExchangeRoseNeed = document.getElementById('golden-exchange-rose-need');
         refs.goldenExchangeDaisyNeed = document.getElementById('golden-exchange-daisy-need');
@@ -413,6 +408,13 @@
 
         if (refs.dailyTaskModalClose) {
             refs.dailyTaskModalClose.onclick = hideDailyTaskModal;
+        }
+
+        if (refs.warehouseToggle) {
+            refs.warehouseToggle.onclick = function() {
+                isWarehouseCollapsed = !isWarehouseCollapsed;
+                renderWarehouseCollapse();
+            };
         }
 
         if (refs.goldenExchangeRoseAction) {
@@ -461,6 +463,26 @@
             total += state.warehouse[flower.id] || 0;
         }
         return total;
+    }
+
+    function renderCollectDetail(state) {
+        if (!refs.collectDetailList) {
+            return;
+        }
+
+        var rows = [];
+        for (var i = 0; i < cfg.FLOWER_TYPES.length; i++) {
+            var flower = cfg.FLOWER_TYPES[i];
+            var count = state.warehouse[flower.id] || 0;
+            rows.push(
+                '<div class="collect-detail-item">' +
+                '<span class="collect-detail-name">' + flower.name + '</span>' +
+                '<span class="collect-detail-count">' + count + ' 朵</span>' +
+                '</div>'
+            );
+        }
+
+        refs.collectDetailList.innerHTML = rows.join('');
     }
 
     function renderTradeList(state) {
@@ -615,6 +637,17 @@
         refs.warehouseList.innerHTML = rows.join('');
     }
 
+    function renderWarehouseCollapse() {
+        if (!refs.warehouseCard) {
+            return;
+        }
+
+        refs.warehouseCard.classList.toggle('collapsed', isWarehouseCollapsed);
+        if (refs.warehouseToggle) {
+            refs.warehouseToggle.setAttribute('aria-expanded', isWarehouseCollapsed ? 'false' : 'true');
+        }
+    }
+
     function renderDailyTask(state) {
         if (!refs.dailyTaskProgress || !refs.dailyTaskModalText || !refs.dailyTaskModalClaimBtn) {
             return;
@@ -689,7 +722,7 @@
     }
 
     function renderGoldenExchange(state) {
-        if (!refs.goldenExchangeBtn || !refs.goldenExchangeStatus || !refs.goldenExchangeRoseNeed || !refs.goldenExchangeDaisyNeed || !refs.goldenExchangeRoseAction || !refs.goldenExchangeDaisyAction) {
+        if (!refs.goldenExchangeRoseNeed || !refs.goldenExchangeDaisyNeed || !refs.goldenExchangeRoseAction || !refs.goldenExchangeDaisyAction) {
             return;
         }
 
@@ -697,9 +730,6 @@
         var daisyCount = (state.warehouse && state.warehouse.daisy) || 0;
         var canRoseExchange = canExchangeGoldenByType(state, 'rose');
         var canDaisyExchange = canExchangeGoldenByType(state, 'daisy');
-        var canAnyExchange = canRoseExchange || canDaisyExchange;
-
-        refs.goldenExchangeStatus.textContent = canAnyExchange ? '可兑换' : '去兑换';
         refs.goldenExchangeRoseNeed.textContent = '玫瑰: ' + roseCount + '/' + GOLDEN_EXCHANGE_COST;
         refs.goldenExchangeDaisyNeed.textContent = '雏菊: ' + daisyCount + '/' + GOLDEN_EXCHANGE_COST;
         refs.goldenExchangeRoseAction.disabled = !canRoseExchange;
@@ -789,6 +819,7 @@
         refs.expFill.style.width = Math.floor(expRatio * 100) + '%';
         refs.expText.textContent = displayExp + '/' + state.maxExp;
         refs.expPercent.textContent = isMaxLevel ? 'MAX' : Math.floor(expRatio * 100) + '%';
+        renderWarehouseCollapse();
         renderWarehouseList(state);
         renderDailyTask(state);
         renderGoldenExchange(state);
@@ -798,6 +829,7 @@
 
         if (refs.collectModal && refs.collectModal.classList.contains('show')) {
             refs.collectTotal.textContent = getCollectedTotal(state) + ' 朵';
+            renderCollectDetail(state);
             renderTradeList(state);
         }
     }
@@ -833,6 +865,7 @@
         }
 
         refs.collectTotal.textContent = getCollectedTotal(state) + ' 朵';
+        renderCollectDetail(state);
         renderTradeList(state);
         setTradeTip('', false);
         refs.collectModal.classList.add('show');
@@ -862,6 +895,9 @@
             onQuickWater = handlers && handlers.onWater;
             onQuickPlant = handlers && handlers.onPlant;
             onQuickHarvest = handlers && handlers.onHarvest;
+        },
+        showGoldenExchangeModal: function(state) {
+            showGoldenExchangeModal(state || window.FlowerState);
         },
         setSeedSelectHandler: function(handler) {
             onSeedSelect = handler;

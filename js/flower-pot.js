@@ -31,6 +31,7 @@
         this.flowerTopOffsetRatio = 0.20;
         this.growthEvent = null;
         this.revealEvent = null;
+        this.revealTween = null;
 
         this.sprite.inputEnabled = true;
         this.sprite.events.onInputDown.add(this.handleClick, this);
@@ -38,7 +39,9 @@
 
     FlowerPot.prototype.setOperable = function(operable) {
         this.isOperable = operable;
-        this.sprite.tint = operable ? 0xffffff : 0x000000;
+        this.sprite.loadTexture(operable ? 'pot' : 'potLocked');
+        this.sprite.tint = 0xffffff;
+        this.sprite.alpha = 1;
     };
 
     FlowerPot.prototype.handleClick = function() {
@@ -280,6 +283,11 @@
             this.revealEvent = null;
         }
 
+        if (this.revealTween) {
+            this.game.tweens.remove(this.revealTween);
+            this.revealTween = null;
+        }
+
         for (var i = 0; i < this.stageSprites.length; i++) {
             this.stageSprites[i].destroy();
         }
@@ -305,7 +313,12 @@
             this.revealEvent = null;
         }
 
-        this.revealEvent = this.game.time.events.add(16, function() {
+        if (this.revealTween) {
+            this.game.tweens.remove(this.revealTween);
+            this.revealTween = null;
+        }
+
+        this.revealEvent = this.game.time.events.add(100, function() {
             this.revealEvent = null;
 
             if (this.currentStage !== stageIndex) {
@@ -313,7 +326,15 @@
             }
 
             if (stageIndex >= 0 && stageIndex < this.stageSprites.length) {
-                this.stageSprites[stageIndex].visible = true;
+                var currentSprite = this.stageSprites[stageIndex];
+                currentSprite.alpha = 0;
+                currentSprite.visible = true;
+                this.revealTween = this.game.add.tween(currentSprite).to({
+                    alpha: 1
+                }, 220, Phaser.Easing.Cubic.Out, true);
+                this.revealTween.onComplete.add(function() {
+                    this.revealTween = null;
+                }, this);
             }
         }, this);
     };
