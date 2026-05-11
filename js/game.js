@@ -128,9 +128,8 @@
 
             var npcScale = (game.width / 5.5) / npcImg.width;
             npcFarmer.scale.setTo(npcScale);
-            npcFarmer.x = house.x - house.width * 0.5;
+            npcFarmer.x = house.x + house.width * 0.38;
             npcFarmer.y = house.y + house.height * 0.5;
-            game.world.bringToTop(npcFarmer);
         }
         positionFarmer();
         game.scale.onSizeChange.add(positionFarmer, this);

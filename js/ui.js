@@ -126,22 +126,6 @@
             document.body.appendChild(dailyTaskCard);
         }
 
-        var stageDonateCard = document.getElementById('stage-donate-card');
-        if (!stageDonateCard) {
-            stageDonateCard = document.createElement('button');
-            stageDonateCard.id = 'stage-donate-card';
-            stageDonateCard.className = 'quick-action-btn stage-donate-card';
-            stageDonateCard.type = 'button';
-            stageDonateCard.innerHTML =
-                '<img src="img/npc/舞台.png" alt="送给明星">' +
-                '<span class="quick-action-label">送给明星</span>' +
-                '<span class="quick-action-count">进入舞台</span>';
-            stageDonateCard.onclick = function() {
-                window.location.href = 'donate.html';
-            };
-            document.body.appendChild(stageDonateCard);
-        }
-
         var seedToolbar = document.getElementById('seed-toolbar');
         if (!seedToolbar) {
             seedToolbar = document.createElement('div');
@@ -165,6 +149,25 @@
             }
 
             document.body.appendChild(seedToolbar);
+        }
+
+        var stageDonateCard = document.getElementById('stage-donate-card');
+        if (!stageDonateCard) {
+            stageDonateCard = document.createElement('button');
+            stageDonateCard.id = 'stage-donate-card';
+            stageDonateCard.className = 'seed-item stage-donate-card';
+            stageDonateCard.type = 'button';
+            stageDonateCard.innerHTML =
+                '<img src="img/npc/舞台.png" alt="送给明星">' +
+                '<div class="seed-name">送给明星</div>' +
+                '<div class="seed-sub">进入舞台</div>';
+            stageDonateCard.onclick = function() {
+                window.location.href = 'donate.html';
+            };
+        }
+
+        if (stageDonateCard.parentNode !== seedToolbar) {
+            seedToolbar.appendChild(stageDonateCard);
         }
 
         var quickFertilizeBtn = document.getElementById('quick-fertilize-btn');
