@@ -53,6 +53,43 @@
 
     var levelUpToastTimer = null;
     var GOLDEN_EXCHANGE_COST = 500;
+    var MODAL_CLOSE_ANIM_MS = 220;
+
+    function openAnimatedModal(modal) {
+        if (!modal) {
+            return;
+        }
+
+        if (modal.__closeTimer) {
+            clearTimeout(modal.__closeTimer);
+            modal.__closeTimer = null;
+        }
+
+        modal.classList.remove('closing');
+        modal.classList.add('show');
+    }
+
+    function closeAnimatedModal(modal) {
+        if (!modal) {
+            return;
+        }
+
+        if (!modal.classList.contains('show') && !modal.classList.contains('closing')) {
+            return;
+        }
+
+        if (modal.__closeTimer) {
+            clearTimeout(modal.__closeTimer);
+            modal.__closeTimer = null;
+        }
+
+        modal.classList.remove('show');
+        modal.classList.add('closing');
+        modal.__closeTimer = setTimeout(function() {
+            modal.classList.remove('closing');
+            modal.__closeTimer = null;
+        }, MODAL_CLOSE_ANIM_MS);
+    }
 
     function getSeedFlowerTypes() {
         var list = [];
@@ -162,7 +199,7 @@
                 '<div class="seed-name">送给明星</div>' +
                 '<div class="seed-sub">进入舞台</div>';
             stageDonateCard.onclick = function() {
-                window.location.href = 'donate.html';
+                window.location.href = 'donate.html?v=20260511';
             };
         }
 
@@ -698,14 +735,14 @@
         if (state) {
             renderDailyTask(state);
         }
-        refs.dailyTaskModal.classList.add('show');
+        openAnimatedModal(refs.dailyTaskModal);
     }
 
     function hideDailyTaskModal() {
         if (!refs.dailyTaskModal) {
             return;
         }
-        refs.dailyTaskModal.classList.remove('show');
+        closeAnimatedModal(refs.dailyTaskModal);
     }
 
     function canExchangeGoldenByType(state, flowerTypeId) {
@@ -751,14 +788,14 @@
             renderGoldenExchange(state);
         }
         setGoldenExchangeTip('', false);
-        refs.goldenExchangeModal.classList.add('show');
+        openAnimatedModal(refs.goldenExchangeModal);
     }
 
     function hideGoldenExchangeModal() {
         if (!refs.goldenExchangeModal) {
             return;
         }
-        refs.goldenExchangeModal.classList.remove('show');
+        closeAnimatedModal(refs.goldenExchangeModal);
     }
 
     function handleGoldenExchange(flowerTypeId) {
@@ -871,14 +908,14 @@
         renderCollectDetail(state);
         renderTradeList(state);
         setTradeTip('', false);
-        refs.collectModal.classList.add('show');
+        openAnimatedModal(refs.collectModal);
     }
 
     function hideCollectModal() {
         if (!refs.collectModal) {
             return;
         }
-        refs.collectModal.classList.remove('show');
+        closeAnimatedModal(refs.collectModal);
     }
 
     window.FlowerUI = {

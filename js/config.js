@@ -7,7 +7,7 @@ window.FLOWER_CONFIG = {
     EXP_PER_FLOWER: 5,
     // 金花出现概率
     MUTATION: {
-        peonyToGoldenChance: 0.05,
+        peonyToGoldenChance: 0.01,
         peonyTypeId: 'peony',
         goldenTypeId: 'golden'
     },

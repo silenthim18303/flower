@@ -4,6 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>种花小游戏</title>
+    <script>
+        (function() {
+            try {
+                if (window.sessionStorage && sessionStorage.getItem('flower_boot_loaded') === '1') {
+                    document.documentElement.classList.add('skip-boot-loading');
+                }
+            } catch (e) {
+            }
+        })();
+    </script>
     <link rel="stylesheet" href="css/game.css" />
     <script src="phaser.min.js"></script>
 </head>

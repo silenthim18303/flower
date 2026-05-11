@@ -69,6 +69,12 @@
                 if (bootLoading && bootLoading.parentNode) {
                     bootLoading.parentNode.removeChild(bootLoading);
                 }
+                try {
+                    if (window.sessionStorage) {
+                        sessionStorage.setItem('flower_boot_loaded', '1');
+                    }
+                } catch (e) {
+                }
                 bootLoading = null;
                 bootLoadingProgressFill = null;
                 bootLoadingProgressText = null;
@@ -128,7 +134,7 @@
 
             var npcScale = (game.width / 5.5) / npcImg.width;
             npcFarmer.scale.setTo(npcScale);
-            npcFarmer.x = house.x + house.width * 0.38;
+            npcFarmer.x = house.x + house.width * 0.5;
             npcFarmer.y = house.y + house.height * 0.5;
         }
         positionFarmer();

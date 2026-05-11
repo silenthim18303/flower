@@ -5,44 +5,180 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>去打赏</title>
     <style>
+        :root {
+            --bg: linear-gradient(135deg, #eef5ff 0%, #f8fbff 100%);
+            --card-bg: #ffffff;
+            --text-main: #234167;
+            --text-sub: #5a7194;
+            --brand: #2b78d6;
+            --border: #dbe5f5;
+            --shadow: 0 14px 28px rgba(9, 20, 40, 0.14);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #eef5ff 0%, #f8fbff 100%);
+            background: var(--bg);
             font-family: "Microsoft YaHei", sans-serif;
-            color: #2c3f5f;
+            color: var(--text-main);
         }
 
-        .card {
-            width: min(360px, calc(100vw - 32px));
-            border-radius: 16px;
-            background: #fff;
-            border: 1px solid #dbe5f5;
-            box-shadow: 0 14px 28px rgba(9, 20, 40, 0.15);
-            padding: 20px 18px;
-            box-sizing: border-box;
-            text-align: center;
+        .page {
+            width: min(1040px, calc(100vw - 24px));
+            margin: 14px auto 24px;
+        }
+
+        .header {
+            position: sticky;
+            top: 10px;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 12px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 20px rgba(9, 20, 40, 0.1);
+            backdrop-filter: blur(4px);
+        }
+
+        .title-wrap {
+            min-width: 0;
         }
 
         .title {
             margin: 0;
-            font-size: 22px;
+            font-size: clamp(18px, 3.6vw, 24px);
             font-weight: 700;
-            color: #244269;
+            color: var(--text-main);
+            line-height: 1.25;
         }
 
         .desc {
-            margin: 10px 0 0;
+            margin: 4px 0 0;
+            font-size: 13px;
+            color: var(--text-sub);
+            line-height: 1.5;
+        }
+
+        .status {
+            flex-shrink: 0;
+            min-width: 104px;
+            height: 38px;
+            padding: 0 12px;
+            border-radius: 999px;
+            border: 1px solid #d8e5fa;
+            background: #edf4ff;
+            color: #245ca3;
+            font-size: 13px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .grid {
+            margin-top: 12px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .star-card {
+            border-radius: 14px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            animation: pop-in 220ms ease both;
+        }
+
+        .star-avatar {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            border-radius: 10px;
+            background: #f1f6ff;
+            border: 1px solid #e3edf9;
+        }
+
+        .star-name {
+            margin: 0;
             font-size: 14px;
-            line-height: 1.6;
-            color: #556d92;
+            font-weight: 700;
+            color: var(--text-main);
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .star-count {
+            margin: 0;
+            font-size: 12px;
+            color: var(--text-sub);
+            text-align: center;
+        }
+
+        .donate-btn {
+            border: none;
+            border-radius: 10px;
+            height: 34px;
+            background: var(--brand);
+            color: #fff;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 120ms ease, opacity 120ms ease;
+        }
+
+        .donate-btn:active {
+            transform: translateY(1px);
+        }
+
+        .donate-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.45;
+        }
+
+        .footer {
+            margin-top: 12px;
+            display: grid;
+            gap: 8px;
+        }
+
+        .tip {
+            min-height: 20px;
+            margin: 0;
+            text-align: center;
+            font-size: 12px;
+            color: #8e4a4a;
+        }
+
+        .tip.success {
+            color: #277146;
         }
 
         .back {
-            margin-top: 16px;
+            border: none;
+            border-radius: 10px;
+            height: 38px;
+            width: 100%;
+            background: #e7eef8;
+            color: #476486;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .save {
             border: none;
             border-radius: 10px;
             height: 38px;
@@ -53,13 +189,187 @@
             font-weight: 700;
             cursor: pointer;
         }
+
+        @keyframes pop-in {
+            from {
+                opacity: 0;
+                transform: translateY(6px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
     </style>
+    <script src="js/config.js"></script>
+    <script src="js/state.js"></script>
 </head>
 <body>
-    <div class="card">
-        <h1 class="title">请选择你喜欢的明星进行送花打赏</h1>
-        <p class="desc">正在开发中...</p>
-        <button class="back" type="button" onclick="window.location.href='index.html'">返回游戏</button>
+    <div class="page">
+        <div class="header">
+            <div class="title-wrap">
+                <h1 class="title">请选择你喜欢的明星进行金花打赏</h1>
+                <p class="desc">每次打赏消耗 1 朵金花，打赏记录会保存在本地。</p>
+            </div>
+            <div class="status" id="golden-count">金花：0</div>
+        </div>
+
+        <div class="grid" id="star-grid"></div>
+
+        <div class="footer">
+            <p class="tip" id="donate-tip"></p>
+            <button class="save" type="button" id="save-back-btn">保存并返回游戏</button>
+            <button class="back" type="button" onclick="window.location.href='index.html'">直接返回游戏</button>
+        </div>
     </div>
+
+    <script>
+        (function() {
+            var DONATE_RECORD_KEY = 'flower_donate_records_v1';
+            var stars = [
+                '乌兰图雅', '侯宇', '叶一茜', '唐艺昕', '安崎',
+                '庄法', '徐梦洁', '徐洁儿', '曾沛慈', '李小冉',
+                '李心洁', '江语晨', '温峥嵘', '王濛', '范玮琪',
+                '萧蔷', '谢楠', '赵子琪', '阚清子', '陶昕然'
+            ];
+
+            var state = window.FlowerState;
+            var stateService = window.FlowerStateService;
+            var goldenCountEl = document.getElementById('golden-count');
+            var gridEl = document.getElementById('star-grid');
+            var tipEl = document.getElementById('donate-tip');
+            var saveBackBtn = document.getElementById('save-back-btn');
+            var donateRecords = loadDonateRecords();
+
+            if (stateService && typeof stateService.loadProgress === 'function') {
+                stateService.loadProgress();
+            }
+
+            renderStars();
+            refreshUI();
+
+            if (saveBackBtn) {
+                saveBackBtn.addEventListener('click', function() {
+                    saveProgress();
+                    window.location.href = 'index.html';
+                });
+            }
+
+            function loadDonateRecords() {
+                try {
+                    var raw = localStorage.getItem(DONATE_RECORD_KEY);
+                    if (!raw) {
+                        return {};
+                    }
+                    var parsed = JSON.parse(raw);
+                    return parsed && typeof parsed === 'object' ? parsed : {};
+                } catch (e) {
+                    return {};
+                }
+            }
+
+            function saveDonateRecords() {
+                try {
+                    localStorage.setItem(DONATE_RECORD_KEY, JSON.stringify(donateRecords));
+                } catch (e) {
+                }
+            }
+
+            function getGoldenCount() {
+                if (!state || !state.warehouse) {
+                    return 0;
+                }
+                var value = parseInt(state.warehouse.golden, 10);
+                return isNaN(value) ? 0 : Math.max(value, 0);
+            }
+
+            function saveProgress() {
+                if (stateService && typeof stateService.saveProgress === 'function') {
+                    stateService.saveProgress();
+                }
+            }
+
+            function setTip(text, isSuccess) {
+                if (!tipEl) {
+                    return;
+                }
+                tipEl.textContent = text || '';
+                tipEl.className = isSuccess ? 'tip success' : 'tip';
+            }
+
+            function donateTo(starName) {
+                var goldenCount = getGoldenCount();
+                if (goldenCount <= 0) {
+                    setTip('金花不足，先回花园找花农兑换吧。', false);
+                    refreshUI();
+                    return;
+                }
+
+                state.warehouse.golden = goldenCount - 1;
+                donateRecords[starName] = (donateRecords[starName] || 0) + 1;
+                saveDonateRecords();
+                saveProgress();
+                setTip('已向 ' + starName + ' 打赏 1 朵金花。', true);
+                refreshUI();
+            }
+
+            function renderStars() {
+                if (!gridEl) {
+                    return;
+                }
+
+                var html = [];
+                for (var i = 0; i < stars.length; i++) {
+                    var starName = stars[i];
+                    var donated = donateRecords[starName] || 0;
+                    html.push(
+                        '<article class="star-card" data-star="' + starName + '">' +
+                        '  <img class="star-avatar" src="img/人物形象/' + starName + '.png" alt="' + starName + '">' +
+                        '  <h2 class="star-name">' + starName + '</h2>' +
+                        '  <p class="star-count" data-star-count="' + starName + '">已收到：' + donated + ' 朵金花</p>' +
+                        '  <button class="donate-btn" type="button" data-action="donate" data-star="' + starName + '">打赏 1 朵金花</button>' +
+                        '</article>'
+                    );
+                }
+                gridEl.innerHTML = html.join('');
+            }
+
+            function refreshUI() {
+                var goldenCount = getGoldenCount();
+                if (goldenCountEl) {
+                    goldenCountEl.textContent = '金花：' + goldenCount;
+                }
+
+                if (!gridEl) {
+                    return;
+                }
+
+                var countEls = gridEl.querySelectorAll('[data-star-count]');
+                for (var i = 0; i < countEls.length; i++) {
+                    var countEl = countEls[i];
+                    var starName = countEl.getAttribute('data-star-count');
+                    var donated = donateRecords[starName] || 0;
+                    countEl.textContent = '已收到：' + donated + ' 朵金花';
+                }
+
+                var donateBtns = gridEl.querySelectorAll('[data-action="donate"]');
+                for (var j = 0; j < donateBtns.length; j++) {
+                    donateBtns[j].disabled = goldenCount <= 0;
+                }
+            }
+
+            document.addEventListener('click', function(e) {
+                var target = e.target;
+                if (!target || target.getAttribute('data-action') !== 'donate') {
+                    return;
+                }
+                var starName = target.getAttribute('data-star');
+                if (!starName) {
+                    return;
+                }
+                donateTo(starName);
+            });
+        })();
+    </script>
 </body>
 </html>
