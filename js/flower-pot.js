@@ -355,6 +355,24 @@
         }
     };
 
+    FlowerPot.prototype.restoreState = function(flowerType, stage) {
+        if (!flowerType || stage < 0) {
+            return;
+        }
+
+        this.currentFlowerType = flowerType;
+        this.growthStages = this.buildGrowthStageKeys(flowerType);
+        this.createStageSprites();
+        this.syncStageTransforms();
+
+        this.currentStage = Math.min(stage, this.growthStages.length - 1);
+        this.showStageSafely(this.currentStage);
+
+        if (this.currentStage < this.growthStages.length - 1) {
+            this.startGrowing();
+        }
+    };
+
     FlowerPot.prototype.updatePosition = function() {
         var newPotScale = (this.game.width / 6) / this.potOriginalWidth;
         var newPotWidth = this.potOriginalWidth * newPotScale;

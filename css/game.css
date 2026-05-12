@@ -66,14 +66,21 @@ html.skip-boot-loading #boot-loading {
     text-align: right;
 }
 
-#level-ui {
+#left-top-panel {
     position: fixed;
     top: 12px;
     left: 12px;
     z-index: 20;
-    width: 206px;
-    padding: 14px 14px 10px;
-    border-radius: 16px;
+    width: 165px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+#level-ui {
+    width: 100%;
+    padding: 11px 11px 8px;
+    border-radius: 13px;
     background: rgba(255, 255, 255, 0.95);
     border: 1px solid #dbe5f5;
     box-shadow: 0 8px 18px rgba(10, 19, 37, 0.18);
@@ -86,33 +93,33 @@ html.skip-boot-loading #boot-loading {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 #level-ui .level-title {
-    font-size: 12px;
+    font-size: 10px;
     color: #5f6f87;
     letter-spacing: 0.2px;
 }
 
 #level-ui .level-pill {
-    height: 24px;
-    min-width: 82px;
-    padding: 0 10px;
-    border-radius: 12px;
+    height: 19px;
+    min-width: 66px;
+    padding: 0 8px;
+    border-radius: 10px;
     background: #eaf2ff;
     color: #2c5ea8;
-    font-size: 14px;
+    font-size: 11px;
     font-weight: 700;
-    line-height: 24px;
+    line-height: 19px;
     text-align: center;
     box-sizing: border-box;
 }
 
 #level-ui .exp-track {
     width: 100%;
-    height: 12px;
-    border-radius: 6px;
+    height: 10px;
+    border-radius: 5px;
     background: #eef3fb;
     overflow: hidden;
 }
@@ -120,17 +127,17 @@ html.skip-boot-loading #boot-loading {
 #level-ui .exp-fill {
     width: 0;
     height: 100%;
-    border-radius: 6px;
+    border-radius: 5px;
     background: #5ea8ff;
     transition: width 180ms ease-out;
 }
 
 #level-ui .exp-footer {
-    margin-top: 8px;
+    margin-top: 6px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 12px;
+    font-size: 10px;
 }
 
 #level-ui .exp-text {
@@ -143,24 +150,20 @@ html.skip-boot-loading #boot-loading {
 
 #level-ui .max-level-text {
     display: none;
-    margin-top: 6px;
-    padding: 6px 8px;
-    border-radius: 10px;
+    margin-top: 5px;
+    padding: 5px 6px;
+    border-radius: 8px;
     background: #ecf9f0;
     color: #2e7d50;
-    font-size: 11px;
+    font-size: 9px;
     font-weight: 700;
     text-align: center;
 }
 
 #warehouse-card {
-    position: fixed;
-    top: 170px;
-    left: 12px;
-    z-index: 20;
-    width: 206px;
-    padding: 10px 10px 8px;
-    border-radius: 14px;
+    width: 100%;
+    padding: 8px 8px 6px;
+    border-radius: 11px;
     background: rgba(255, 255, 255, 0.95);
     border: 1px solid #dbe5f5;
     box-shadow: 0 8px 18px rgba(10, 19, 37, 0.14);
@@ -170,22 +173,22 @@ html.skip-boot-loading #boot-loading {
 
 #warehouse-card .warehouse-toggle {
     width: 100%;
-    height: 30px;
+    height: 24px;
     border: none;
-    border-radius: 10px;
+    border-radius: 8px;
     background: #eef4ff;
     color: #38567c;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 10px;
-    font-size: 12px;
+    padding: 0 8px;
+    font-size: 10px;
     font-weight: 700;
     cursor: pointer;
 }
 
 #warehouse-card .warehouse-arrow {
-    font-size: 12px;
+    font-size: 10px;
     line-height: 1;
     transition: transform 160ms ease;
 }
@@ -195,12 +198,12 @@ html.skip-boot-loading #boot-loading {
 }
 
 #warehouse-card .warehouse-list {
-    margin-top: 8px;
+    margin-top: 6px;
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 4px;
     overflow: hidden;
-    max-height: 260px;
+    max-height: 208px;
     opacity: 1;
     transition: max-height 220ms ease, opacity 180ms ease, margin-top 180ms ease;
 }
@@ -215,9 +218,9 @@ html.skip-boot-loading #boot-loading {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 12px;
-    padding: 4px 6px;
-    border-radius: 8px;
+    font-size: 10px;
+    padding: 3px 5px;
+    border-radius: 6px;
     background: #f6f9ff;
 }
 
@@ -231,7 +234,7 @@ html.skip-boot-loading #boot-loading {
 }
 
 .quick-action-btn.daily-task-card {
-    left: 226px;
+    left: 183px;
     right: auto;
     top: 12px;
 }
@@ -549,6 +552,8 @@ html.skip-boot-loading #boot-loading {
 #collect-modal .collect-modal-card {
     position: relative;
     width: min(320px, calc(100vw - 36px));
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
     border-radius: 18px;
     padding: 18px 16px 14px;
     box-sizing: border-box;
@@ -737,10 +742,10 @@ html.skip-boot-loading #boot-loading {
 
 .quick-action-btn {
     position: fixed;
-    top: 12px;
+    top: 58px;
     z-index: 26;
-    width: 86px;
-    padding: 8px 6px 7px;
+    width: 69px;
+    padding: 6px 5px 6px;
     border: 1px solid #dbe5f5;
     border-radius: 14px;
     background: rgba(255, 255, 255, 0.95);
@@ -759,33 +764,33 @@ html.skip-boot-loading #boot-loading {
 
 .quick-action-right {
     right: 10px;
-    top: 98px;
+    top: 144px;
 }
 
 .quick-action-plant {
     right: 10px;
-    top: 184px;
+    top: 230px;
 }
 
 .quick-action-harvest {
     right: 10px;
-    top: 270px;
+    top: 316px;
 }
 
 .quick-action-btn img {
-    width: 28px;
-    height: 28px;
+    width: 22px;
+    height: 22px;
     object-fit: contain;
 }
 
 .quick-action-label {
-    font-size: 12px;
+    font-size: 10px;
     color: #3b4f70;
     line-height: 1;
 }
 
 .quick-action-count {
-    font-size: 12px;
+    font-size: 10px;
     color: #205fac;
     font-weight: 700;
     line-height: 1;
@@ -842,21 +847,23 @@ html.skip-boot-loading #boot-loading {
 }
 
 @media (max-width: 420px) {
+    #left-top-panel {
+        width: 144px;
+    }
+
     #level-ui {
-        width: 180px;
-        padding: 12px 12px 8px;
+        width: 144px;
+        padding: 10px 10px 6px;
     }
 
     #warehouse-card {
-        top: 154px;
-        left: 12px;
-        width: 180px;
-        padding: 8px;
+        width: 144px;
+        padding: 6px;
     }
 
     #level-ui .level-pill {
-        min-width: 72px;
-        font-size: 13px;
+        min-width: 58px;
+        font-size: 10px;
     }
 
     #seed-toolbar {
@@ -866,9 +873,9 @@ html.skip-boot-loading #boot-loading {
     }
 
     .quick-action-btn {
-        width: 78px;
-        top: 10px;
-        padding: 7px 5px 6px;
+        width: 62px;
+        top: 50px;
+        padding: 6px 4px 5px;
     }
 
     .quick-action-left {
@@ -877,21 +884,21 @@ html.skip-boot-loading #boot-loading {
 
     .quick-action-right {
         right: 8px;
-        top: 88px;
+        top: 128px;
     }
 
     .quick-action-plant {
         right: 8px;
-        top: 166px;
+        top: 206px;
     }
 
     .quick-action-harvest {
         right: 8px;
-        top: 244px;
+        top: 284px;
     }
 
     .quick-action-btn.daily-task-card {
-        left: 200px;
+        left: 162px;
         right: auto;
         top: 12px;
     }

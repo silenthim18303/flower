@@ -112,6 +112,13 @@
     }
 
     function ensureUI() {
+        var leftTopPanel = document.getElementById('left-top-panel');
+        if (!leftTopPanel) {
+            leftTopPanel = document.createElement('div');
+            leftTopPanel.id = 'left-top-panel';
+            document.body.appendChild(leftTopPanel);
+        }
+
         var levelUI = document.getElementById('level-ui');
         if (!levelUI) {
             levelUI = document.createElement('div');
@@ -130,7 +137,9 @@
                 '</div>',
                 '<div class="max-level-text" id="max-level-text">已满级，已解锁全部花盆</div>',
             ].join('');
-            document.body.appendChild(levelUI);
+        }
+        if (levelUI.parentNode !== leftTopPanel) {
+            leftTopPanel.appendChild(levelUI);
         }
 
         var warehouseCard = document.getElementById('warehouse-card');
@@ -145,7 +154,9 @@
                 '</button>',
                 '<div class="warehouse-list" id="warehouse-list"></div>'
             ].join('');
-            document.body.appendChild(warehouseCard);
+        }
+        if (warehouseCard.parentNode !== leftTopPanel) {
+            leftTopPanel.appendChild(warehouseCard);
         }
 
         var dailyTaskCard = document.getElementById('daily-task-card');

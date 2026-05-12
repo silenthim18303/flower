@@ -56,7 +56,9 @@
         selectedFlowerType: cfg.DEFAULT_FLOWER_TYPE,
         tools: getDefaultTools(),
         dailyTask: getDefaultDailyTask(),
-        flowerPots: []
+        flowerPots: [],
+        potStages: [],
+        potFlowerTypes: []
     };
 
     function getUnlockedPotCountByLevel(level) {
@@ -194,6 +196,13 @@
             } else {
                 state.unlockedPotCount = getUnlockedPotCountByLevel(state.level);
             }
+
+            if (Array.isArray(parsed.potStages)) {
+                state.potStages = parsed.potStages;
+            }
+            if (Array.isArray(parsed.potFlowerTypes)) {
+                state.potFlowerTypes = parsed.potFlowerTypes;
+            }
         } catch (e) {
         }
 
@@ -201,17 +210,40 @@
     }
 
     function saveProgress() {
+        var potStages = null;
+        var potFlowerTypes = null;
+        if (state.flowerPots && state.flowerPots.length > 0) {
+            potStages = [];
+            potFlowerTypes = [];
+            for (var i = 0; i < state.flowerPots.length; i++) {
+                var pot = state.flowerPots[i];
+                potStages.push(pot.currentStage);
+                potFlowerTypes.push(pot.currentFlowerType || null);
+            }
+        }
+
         try {
-            localStorage.setItem(cfg.SAVE_KEY, JSON.stringify({
-                level: state.level,
-                exp: state.exp,
-                warehouse: state.warehouse,
-                warehouseRose: state.warehouse.rose || 0,
-                selectedFlowerType: state.selectedFlowerType,
-                unlockedPotCount: state.unlockedPotCount,
-                tools: state.tools,
-                dailyTask: state.dailyTask
-            }));
+            var raw = localStorage.getItem(cfg.SAVE_KEY);
+            var existing = raw ? JSON.parse(raw) : {};
+            if (!existing || typeof existing !== 'object') {
+                existing = {};
+            }
+
+            existing.level = state.level;
+            existing.exp = state.exp;
+            existing.warehouse = state.warehouse;
+            existing.warehouseRose = state.warehouse.rose || 0;
+            existing.selectedFlowerType = state.selectedFlowerType;
+            existing.unlockedPotCount = state.unlockedPotCount;
+            existing.tools = state.tools;
+            existing.dailyTask = state.dailyTask;
+
+            if (potStages !== null) {
+                existing.potStages = potStages;
+                existing.potFlowerTypes = potFlowerTypes;
+            }
+
+            localStorage.setItem(cfg.SAVE_KEY, JSON.stringify(existing));
         } catch (e) {
         }
     }

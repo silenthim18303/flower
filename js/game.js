@@ -112,7 +112,7 @@
             var houseImg = game.cache.getImage('house');
             var houseScale = (game.width / 1.2) / houseImg.width;
             house.scale.setTo(houseScale);
-            house.x = game.width / 2;
+            house.x = game.width / 2 - house.width * 0.3;
             house.y = game.height * 2 / 5;
         }
         positionHouse();
@@ -341,6 +341,28 @@
 
         applyUnlockedStateToPots();
         updateAllPots();
+
+        var potStages = state.potStages || [];
+        var potFlowerTypes = state.potFlowerTypes || [];
+        for (var i = 0; i < state.flowerPots.length; i++) {
+            var stage = potStages[i];
+            var flowerType = potFlowerTypes[i];
+            if (typeof stage === 'number' && stage >= 0 && flowerType) {
+                state.flowerPots[i].restoreState(flowerType, stage);
+            }
+        }
+
+        function savePotState() {
+            stateService.saveProgress();
+        }
+
+        window.addEventListener('beforeunload', savePotState);
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'hidden') {
+                savePotState();
+            }
+        });
+
         ui.render(state);
         stateService.saveProgress();
         hideBootLoading();
