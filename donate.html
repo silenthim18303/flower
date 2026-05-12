@@ -3,20 +3,12 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>去打赏</title>
+    <title>送给明星</title>
     <style>
-        :root {
-            --bg: linear-gradient(135deg, #eef5ff 0%, #f8fbff 100%);
-            --card-bg: #ffffff;
-            --text-main: #234167;
-            --text-sub: #5a7194;
-            --brand: #2b78d6;
-            --border: #dbe5f5;
-            --shadow: 0 14px 28px rgba(9, 20, 40, 0.14);
-        }
-
         * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         html {
@@ -25,171 +17,243 @@
         }
 
         body {
-            margin: 0;
             min-height: 100vh;
             font-family: "Microsoft YaHei", sans-serif;
-            color: var(--text-main);
+            color: #fff;
         }
 
         .page {
-            width: min(1040px, calc(100vw - 24px));
-            margin: 14px auto 24px;
+            width: min(960px, calc(100vw - 24px));
+            margin: 0 auto;
+            padding: 14px 0 24px;
         }
 
         .header {
             position: sticky;
-            top: 10px;
-            z-index: 5;
+            top: 0;
+            z-index: 10;
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 10px;
-            padding: 12px;
+            padding: 10px 12px;
+            margin-bottom: 14px;
             border-radius: 14px;
-            background: rgba(255, 255, 255, 0.92);
-            border: 1px solid var(--border);
-            box-shadow: 0 10px 20px rgba(9, 20, 40, 0.1);
-            backdrop-filter: blur(4px);
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .title-wrap {
-            min-width: 0;
-        }
-
-        .title {
-            margin: 0;
-            font-size: clamp(18px, 3.6vw, 24px);
-            font-weight: 700;
-            color: var(--text-main);
-            line-height: 1.25;
-        }
-
-        .desc {
-            margin: 4px 0 0;
-            font-size: 13px;
-            color: var(--text-sub);
-            line-height: 1.5;
-        }
-
-        .status {
-            flex-shrink: 0;
-            min-width: 104px;
-            height: 38px;
-            padding: 0 12px;
-            border-radius: 999px;
-            border: 1px solid #d8e5fa;
-            background: #edf4ff;
-            color: #245ca3;
-            font-size: 13px;
-            font-weight: 700;
-            display: inline-flex;
+        .header-left {
+            display: flex;
             align-items: center;
-            justify-content: center;
-        }
-
-        .grid {
-            margin-top: 12px;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             gap: 10px;
         }
 
+        .back-btn {
+            flex-shrink: 0;
+            height: 34px;
+            padding: 0 12px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .back-btn:active {
+            transform: scale(0.96);
+        }
+
+        .title {
+            font-size: clamp(15px, 3vw, 18px);
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .golden-badge {
+            flex-shrink: 0;
+            height: 34px;
+            padding: 0 14px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #f5a623, #f7c948);
+            color: #5a3e00;
+            font-size: 14px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
         .star-card {
-            border-radius: 14px;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-            padding: 10px;
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 16px;
+            padding: 14px 8px 12px;
             display: flex;
             flex-direction: column;
+            align-items: center;
             gap: 8px;
-            animation: pop-in 220ms ease both;
+            transition: background 200ms ease;
+        }
+
+        .star-card:hover {
+            background: #f5f5f5;
         }
 
         .star-avatar {
-            width: 100%;
-            aspect-ratio: 1 / 1;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
             object-fit: cover;
-            border-radius: 10px;
-            background: #f1f6ff;
-            border: 1px solid #e3edf9;
+            border: 3px solid #e0e0e0;
+            background: #f5f5f5;
         }
 
         .star-name {
-            margin: 0;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 700;
-            color: var(--text-main);
+            color: #222;
             text-align: center;
             line-height: 1.2;
         }
 
-        .star-count {
-            margin: 0;
-            font-size: 12px;
-            color: var(--text-sub);
+        .star-received {
+            font-size: 11px;
+            color: #888;
             text-align: center;
         }
 
-        .donate-btn {
+        .qty-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .qty-btn {
+            width: 28px;
+            height: 28px;
             border: none;
-            border-radius: 10px;
-            height: 34px;
-            background: var(--brand);
-            color: #fff;
-            font-size: 13px;
+            border-radius: 8px;
+            background: #eee;
+            color: #333;
+            font-size: 16px;
             font-weight: 700;
             cursor: pointer;
-            transition: transform 120ms ease, opacity 120ms ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 120ms ease;
+            line-height: 1;
+        }
+
+        .qty-btn:hover {
+            background: #ddd;
+        }
+
+        .qty-btn:active {
+            transform: scale(0.92);
+        }
+
+        .qty-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .qty-value {
+            min-width: 28px;
+            text-align: center;
+            font-size: 15px;
+            font-weight: 700;
+            color: #222;
+        }
+
+        .donate-btn {
+            width: 100%;
+            height: 30px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #f5a623, #e89b1d);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 120ms ease, transform 120ms ease;
+        }
+
+        .donate-btn:hover {
+            opacity: 0.9;
         }
 
         .donate-btn:active {
-            transform: translateY(1px);
+            transform: scale(0.97);
         }
 
         .donate-btn:disabled {
+            opacity: 0.35;
             cursor: not-allowed;
-            opacity: 0.45;
         }
 
         .footer {
-            margin-top: 12px;
-            display: grid;
-            gap: 8px;
+            margin-top: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
         }
 
         .tip {
             min-height: 20px;
-            margin: 0;
+            font-size: 13px;
+            color: #f7c948;
             text-align: center;
-            font-size: 12px;
-            color: #8e4a4a;
         }
 
-        .tip.success {
-            color: #277146;
+        .tip.error {
+            color: #ff6b6b;
         }
 
-        .save {
-            border: none;
-            border-radius: 10px;
-            height: 38px;
-            width: 100%;
-            background: #2b78d6;
-            color: #fff;
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        @keyframes pop-in {
-            from {
-                opacity: 0;
-                transform: translateY(6px) scale(0.98);
+        @media (max-width: 480px) {
+            .grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 8px;
             }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
+
+            .star-card {
+                padding: 10px 4px 10px;
+                gap: 6px;
+            }
+
+            .star-avatar {
+                width: 52px;
+                height: 52px;
+            }
+
+            .star-name {
+                font-size: 12px;
+            }
+
+            .qty-btn {
+                width: 24px;
+                height: 24px;
+                font-size: 14px;
+            }
+
+            .qty-value {
+                font-size: 13px;
+                min-width: 24px;
+            }
+
+            .donate-btn {
+                height: 26px;
+                font-size: 11px;
             }
         }
     </style>
@@ -199,18 +263,17 @@
 <body>
     <div class="page">
         <div class="header">
-            <div class="title-wrap">
-                <h1 class="title">请选择你喜欢的明星进行金花打赏</h1>
-                <p class="desc">每次打赏消耗 1 朵金花，打赏记录会保存在本地。</p>
+            <div class="header-left">
+                <button class="back-btn" type="button" id="save-back-btn">返回花园</button>
+                <div class="title">送给明星</div>
             </div>
-            <div class="status" id="golden-count">金花：0</div>
+            <div class="golden-badge">金花：<span id="golden-count">0</span></div>
         </div>
 
         <div class="grid" id="star-grid"></div>
 
         <div class="footer">
             <p class="tip" id="donate-tip"></p>
-            <button class="save" type="button" id="save-back-btn">返回游戏</button>
         </div>
     </div>
 
@@ -231,6 +294,11 @@
             var tipEl = document.getElementById('donate-tip');
             var saveBackBtn = document.getElementById('save-back-btn');
             var donateRecords = loadDonateRecords();
+            var qtyMap = {};
+
+            for (var i = 0; i < stars.length; i++) {
+                qtyMap[stars[i]] = 1;
+            }
 
             if (stateService && typeof stateService.loadProgress === 'function') {
                 stateService.loadProgress();
@@ -280,28 +348,64 @@
                 }
             }
 
-            function setTip(text, isSuccess) {
+            function setTip(text, isError) {
                 if (!tipEl) {
                     return;
                 }
                 tipEl.textContent = text || '';
-                tipEl.className = isSuccess ? 'tip success' : 'tip';
+                tipEl.className = isError ? 'tip error' : 'tip';
             }
 
             function donateTo(starName) {
+                var qty = qtyMap[starName] || 1;
                 var goldenCount = getGoldenCount();
-                if (goldenCount <= 0) {
-                    setTip('金花不足，先回花园找花农兑换吧。', false);
-                    refreshUI();
+
+                if (qty <= 0) {
+                    setTip('请选择赠送数量。', true);
                     return;
                 }
 
-                state.warehouse.golden = goldenCount - 1;
-                donateRecords[starName] = (donateRecords[starName] || 0) + 1;
+                if (goldenCount < qty) {
+                    setTip('金花不足，当前仅有 ' + goldenCount + ' 朵。', true);
+                    return;
+                }
+
+                state.warehouse.golden = goldenCount - qty;
+                donateRecords[starName] = (donateRecords[starName] || 0) + qty;
                 saveDonateRecords();
                 saveProgress();
-                setTip('已向 ' + starName + ' 打赏 1 朵金花。', true);
+                setTip('已向 ' + starName + ' 赠送 ' + qty + ' 朵金花！', false);
+                qtyMap[starName] = 1;
                 refreshUI();
+                renderStars();
+            }
+
+            function changeQty(starName, delta) {
+                var goldenCount = getGoldenCount();
+                var current = qtyMap[starName] || 1;
+                var next = current + delta;
+                if (next < 1) {
+                    next = 1;
+                }
+                if (next > goldenCount) {
+                    next = goldenCount;
+                }
+                qtyMap[starName] = next;
+
+                var qtyEl = gridEl.querySelector('[data-qty="' + starName + '"]');
+                if (qtyEl) {
+                    qtyEl.textContent = next;
+                }
+
+                var minusBtn = gridEl.querySelector('[data-minus="' + starName + '"]');
+                if (minusBtn) {
+                    minusBtn.disabled = next <= 1;
+                }
+
+                var plusBtn = gridEl.querySelector('[data-plus="' + starName + '"]');
+                if (plusBtn) {
+                    plusBtn.disabled = next >= goldenCount;
+                }
             }
 
             function renderStars() {
@@ -309,17 +413,24 @@
                     return;
                 }
 
+                var goldenCount = getGoldenCount();
                 var html = [];
                 for (var i = 0; i < stars.length; i++) {
                     var starName = stars[i];
                     var donated = donateRecords[starName] || 0;
+                    var qty = qtyMap[starName] || 1;
                     html.push(
-                        '<article class="star-card" data-star="' + starName + '">' +
+                        '<div class="star-card" data-star="' + starName + '">' +
                         '  <img class="star-avatar" src="img/人物形象/' + starName + '.png" alt="' + starName + '">' +
-                        '  <h2 class="star-name">' + starName + '</h2>' +
-                        '  <p class="star-count" data-star-count="' + starName + '">已收到：' + donated + ' 朵金花</p>' +
-                        '  <button class="donate-btn" type="button" data-action="donate" data-star="' + starName + '">打赏 1 朵金花</button>' +
-                        '</article>'
+                        '  <div class="star-name">' + starName + '</div>' +
+                        '  <div class="star-received" data-star-count="' + starName + '">已收 ' + donated + '</div>' +
+                        '  <div class="qty-row">' +
+                        '    <button class="qty-btn" type="button" data-action="minus" data-minus="' + starName + '"' + (qty <= 1 ? ' disabled' : '') + '>−</button>' +
+                        '    <span class="qty-value" data-qty="' + starName + '">' + qty + '</span>' +
+                        '    <button class="qty-btn" type="button" data-action="plus" data-plus="' + starName + '"' + (qty >= goldenCount ? ' disabled' : '') + '>+</button>' +
+                        '  </div>' +
+                        '  <button class="donate-btn" type="button" data-action="donate" data-star="' + starName + '"' + (goldenCount <= 0 ? ' disabled' : '') + '>赠送</button>' +
+                        '</div>'
                     );
                 }
                 gridEl.innerHTML = html.join('');
@@ -328,7 +439,7 @@
             function refreshUI() {
                 var goldenCount = getGoldenCount();
                 if (goldenCountEl) {
-                    goldenCountEl.textContent = '金花：' + goldenCount;
+                    goldenCountEl.textContent = goldenCount;
                 }
 
                 if (!gridEl) {
@@ -340,25 +451,53 @@
                     var countEl = countEls[i];
                     var starName = countEl.getAttribute('data-star-count');
                     var donated = donateRecords[starName] || 0;
-                    countEl.textContent = '已收到：' + donated + ' 朵金花';
+                    countEl.textContent = '已收 ' + donated;
                 }
 
                 var donateBtns = gridEl.querySelectorAll('[data-action="donate"]');
                 for (var j = 0; j < donateBtns.length; j++) {
                     donateBtns[j].disabled = goldenCount <= 0;
                 }
+
+                var plusBtns = gridEl.querySelectorAll('[data-action="plus"]');
+                for (var k = 0; k < plusBtns.length; k++) {
+                    var plusBtn = plusBtns[k];
+                    var star = plusBtn.getAttribute('data-plus');
+                    plusBtn.disabled = (qtyMap[star] || 1) >= goldenCount;
+                }
             }
 
             document.addEventListener('click', function(e) {
                 var target = e.target;
-                if (!target || target.getAttribute('data-action') !== 'donate') {
+                if (!target) {
                     return;
                 }
-                var starName = target.getAttribute('data-star');
-                if (!starName) {
+
+                var action = target.getAttribute('data-action');
+
+                if (action === 'minus') {
+                    var starName = target.getAttribute('data-minus');
+                    if (starName) {
+                        changeQty(starName, -1);
+                    }
                     return;
                 }
-                donateTo(starName);
+
+                if (action === 'plus') {
+                    var starName = target.getAttribute('data-plus');
+                    if (starName) {
+                        changeQty(starName, 1);
+                    }
+                    return;
+                }
+
+                if (action === 'donate') {
+                    var starName = target.getAttribute('data-star');
+                    if (starName) {
+                        donateTo(starName);
+                    }
+                    return;
+                }
             });
         })();
     </script>
