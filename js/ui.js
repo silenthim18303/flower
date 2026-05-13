@@ -10,6 +10,7 @@
  * - FlowerUICollect: 收花统计弹窗 + 交易
  * - FlowerUIDaily: 每日任务弹窗
  * - FlowerUIExchange: 花农兑换弹窗
+ * - FlowerUIHelp: 帮助弹窗
  */
 (function() {
     var cfg = window.FLOWER_CONFIG;
@@ -21,6 +22,7 @@
     var collect = window.FlowerUICollect;
     var daily = window.FlowerUIDaily;
     var exchange = window.FlowerUIExchange;
+    var help = window.FlowerUIHelp;
 
     /**
      * DOM元素引用缓存
@@ -199,6 +201,13 @@
          */
         setNameChangeHandler: function(handler) {
             callbacks.onNameChange = handler;
+        },
+
+        /**
+         * 显示帮助弹窗
+         */
+        showHelpModal: function() {
+            help.show();
         }
     };
 })();

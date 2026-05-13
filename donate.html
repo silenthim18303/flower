@@ -89,8 +89,9 @@
 
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-            gap: 12px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            width: 100%;
         }
 
         .star-card {
@@ -224,39 +225,84 @@
         }
 
         @media (max-width: 480px) {
-            .grid {
-                grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+            .page {
+                padding: 10px 8px 20px;
+            }
+
+            .header {
+                padding: 8px 10px;
                 gap: 8px;
             }
 
-            .star-card {
-                padding: 10px 4px 10px;
-                gap: 6px;
-            }
-
-            .star-avatar {
-                width: 52px;
-                height: 52px;
-            }
-
-            .star-name {
+            .back-btn {
+                height: 30px;
+                padding: 0 10px;
                 font-size: 12px;
             }
 
-            .qty-btn {
-                width: 24px;
-                height: 24px;
+            .title {
                 font-size: 14px;
             }
 
+            .golden-badge {
+                height: 30px;
+                padding: 0 10px;
+                font-size: 12px;
+            }
+
+            .grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 6px;
+            }
+
+            .star-card {
+                padding: 8px 4px 8px;
+                gap: 4px;
+                border-radius: 12px;
+            }
+
+            .star-avatar {
+                width: 44px;
+                height: 44px;
+                border-width: 2px;
+            }
+
+            .star-name {
+                font-size: 11px;
+            }
+
+            .star-received {
+                font-size: 10px;
+            }
+
+            .qty-row {
+                gap: 4px;
+            }
+
+            .qty-btn {
+                width: 22px;
+                height: 22px;
+                font-size: 12px;
+                border-radius: 6px;
+            }
+
             .qty-value {
-                font-size: 13px;
-                min-width: 24px;
+                font-size: 12px;
+                min-width: 20px;
             }
 
             .donate-btn {
-                height: 26px;
-                font-size: 11px;
+                height: 24px;
+                font-size: 10px;
+                border-radius: 6px;
+            }
+
+            .footer {
+                margin-top: 12px;
+            }
+
+            .tip {
+                font-size: 12px;
             }
         }
     </style>

@@ -59,17 +59,18 @@
             updateBootLoadingProgress(0);
 
             // 加载背景和UI资源
-            this.load.image('background', 'img/背景/背景.png');
-            this.load.image('pot', 'img/背景/花盆.png');
-            this.load.image('potLocked', 'img/背景/未解锁花盆.png');
-            this.load.image('house', 'img/背景/房子.png');
-            this.load.image('npcFarmer', 'img/npc/花农2.png');
+            this.load.image('background', 'img/背景/背景.png', { scale: 1 });
+            this.load.image('pot', 'img/背景/花盆.png', { scale: 1 });
+            this.load.image('potLocked', 'img/背景/未解锁花盆.png', { scale: 1 });
+            this.load.image('house', 'img/背景/房子.png', { scale: 1 });
+            this.load.image('npcFarmer', 'img/npc/花农2.png', { scale: 1 });
+            this.load.image('npcFairy', 'img/npc/花仙子.png', { scale: 1 });
 
             // 加载各花种5个阶段的图片
             for (var i = 0; i < cfg.FLOWER_TYPES.length; i++) {
                 var flower = cfg.FLOWER_TYPES[i];
                 for (var stage = 1; stage <= 5; stage++) {
-                    this.load.image(flower.id + stage, 'img/' + flower.folder + '/' + stage + '.png');
+                    this.load.image(flower.id + stage, 'img/' + flower.folder + '/' + stage + '.png', { scale: 1 });
                 }
             }
         },
@@ -81,6 +82,25 @@
         create: function() {
             var self = this;
             var scene = this;
+            
+            // 启用纹理过滤，优化缩放质量
+            this.textures.get('background').setFilter(Phaser.Textures.FilterMode.LINEAR, Phaser.Textures.FilterMode.LINEAR);
+            this.textures.get('pot').setFilter(Phaser.Textures.FilterMode.LINEAR, Phaser.Textures.FilterMode.LINEAR);
+            this.textures.get('potLocked').setFilter(Phaser.Textures.FilterMode.LINEAR, Phaser.Textures.FilterMode.LINEAR);
+            this.textures.get('house').setFilter(Phaser.Textures.FilterMode.LINEAR, Phaser.Textures.FilterMode.LINEAR);
+            this.textures.get('npcFarmer').setFilter(Phaser.Textures.FilterMode.LINEAR, Phaser.Textures.FilterMode.LINEAR);
+            this.textures.get('npcFairy').setFilter(Phaser.Textures.FilterMode.LINEAR, Phaser.Textures.FilterMode.LINEAR);
+            
+            // 设置所有花朵纹理过滤
+            for (var i = 0; i < cfg.FLOWER_TYPES.length; i++) {
+                var flower = cfg.FLOWER_TYPES[i];
+                for (var stage = 1; stage <= 5; stage++) {
+                    var texture = this.textures.get(flower.id + stage);
+                    if (texture) {
+                        texture.setFilter(Phaser.Textures.FilterMode.LINEAR, Phaser.Textures.FilterMode.LINEAR);
+                    }
+                }
+            }
 
             // ========== 背景 ==========
             var bg = scene.add.image(0, 0, 'background');
@@ -153,10 +173,52 @@
             }
             positionFarmer();
 
+            // ========== 花仙子NPC（点击打开帮助弹窗） ==========
+            var npcFairy = scene.add.image(0, 0, 'npcFairy');
+            npcFairy.setOrigin(0.5, 0.5);
+            npcFairy.setInteractive({ useHandCursor: true });
+            npcFairy.on('pointerdown', function() {
+                ui.showHelpModal();
+            });
+
+            // 花仙子上下浮动动画
+            scene.tweens.add({
+                targets: npcFairy,
+                y: '+=8',
+                duration: 1500,
+                ease: 'Sine.easeInOut',
+                yoyo: true,
+                repeat: -1
+            });
+
+            /**
+             * 更新花仙子位置（窗口大小变化时）
+             * 使用屏幕百分比定位，方便手动调整
+             * 调整 leftPct 和 topPct 即可改变位置
+             */
+            function positionFairy() {
+                var fImg = scene.textures.get('npcFairy').getSourceImage();
+                if (!fImg || !fImg.width) {
+                    return;
+                }
+
+                var fairyScale = (scene.scale.width / 7) / fImg.width;
+                npcFairy.setScale(fairyScale);
+
+                // 手动调整这两个百分比值（0~1）
+                var leftPct = 0.5;  // 距离左边 50%
+                var topPct = 0.13;   // 距离顶部 13%
+
+                npcFairy.x = scene.scale.width * leftPct;
+                npcFairy.y = scene.scale.height * topPct;
+            }
+            positionFairy();
+
             // 窗口大小变化时更新所有元素位置
             scene.scale.on('resize', function() {
                 positionHouse();
                 positionFarmer();
+                positionFairy();
                 updateAllPots();
             });
 
@@ -455,6 +517,15 @@
             ui.render(state);
             stateService.saveProgress();
             hideBootLoading();
+
+            // ========== 非移动端设备提示 ==========
+            setTimeout(function() {
+                var ua = navigator.userAgent || '';
+                var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+                if (!isMobile) {
+                    showDeviceWarning();
+                }
+            }, 2000);
         },
 
         /**
@@ -474,14 +545,20 @@
         backgroundColor: '#000000',
         scale: {
             mode: Phaser.Scale.RESIZE,
-            autoCenter: Phaser.Scale.CENTER_BOTH
+            autoCenter: Phaser.Scale.CENTER_BOTH,
+            autoRound: false,  // 禁用自动取整，保持亚像素精度
+            resolution: window.devicePixelRatio || 1  // 使用设备像素比
         },
         scene: [FlowerScene],
         render: {
             antialias: true,    // 启用抗锯齿
+            antialiasGL: true,  // WebGL抗锯齿
             roundPixels: false,  // 允许亚像素渲染
-            pixelArt: false      // 关闭像素艺术模式
-        }
+            pixelArt: false,     // 关闭像素艺术模式
+            preservePixelArt: false,  // 不保留像素艺术
+            clearBeforeRender: true
+        },
+        canvasStyle: 'image-rendering: -moz-crisp-edges; image-rendering: -webkit-crisp-edges; image-rendering: pixelated; image-rendering: crisp-edges;'  // 优化图像渲染
     });
 
     // ========== 启动加载页函数 ==========
@@ -546,5 +623,44 @@
                 bootLoadingProgressText = null;
             }, 320);
         }, waitBeforeHide);
+    }
+
+    /**
+     * 显示设备不兼容警告弹窗
+     * 游戏内自定义弹窗，非浏览器原生alert
+     */
+    function showDeviceWarning() {
+        var modal = document.createElement('div');
+        modal.id = 'device-warning-modal';
+        modal.innerHTML = [
+            '<div class="device-warning-mask"></div>',
+            '<div class="device-warning-card">',
+            '  <div class="device-warning-icon">&#9888;</div>',
+            '  <div class="device-warning-title">温馨提示</div>',
+            '  <div class="device-warning-text">建议使用手机游玩此设备，不同设备的分辨率不同，可能会严重影响到体验</div>',
+            '  <button class="device-warning-btn" type="button">我知道了</button>',
+            '</div>'
+        ].join('');
+
+        document.body.appendChild(modal);
+
+        // 触发动画
+        requestAnimationFrame(function() {
+            modal.classList.add('show');
+        });
+
+        // 绑定关闭按钮
+        var btn = modal.querySelector('.device-warning-btn');
+        if (btn) {
+            btn.onclick = function() {
+                modal.classList.remove('show');
+                modal.classList.add('closing');
+                setTimeout(function() {
+                    if (modal.parentNode) {
+                        modal.parentNode.removeChild(modal);
+                    }
+                }, 220);
+            };
+        }
     }
 })();
