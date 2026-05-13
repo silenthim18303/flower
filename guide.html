@@ -50,7 +50,10 @@
             border-radius: 20px;
             padding: 30px;
             margin: 20px;
+            width: 90%;
             max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             z-index: 10;
         }
@@ -93,16 +96,19 @@
 
         .guide-image {
             width: 100%;
-            height: 200px;
-            background: #f8f9fa;
-            border-radius: 12px;
+            max-height: 300px;
             margin-bottom: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
-            color: #666;
-            border: 2px dashed #ddd;
+            overflow: hidden;
+        }
+
+        .guide-image img {
+            max-width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+            border-radius: 12px;
         }
 
         .guide-text {
@@ -188,6 +194,76 @@
             color: #333;
         }
 
+        /* 自定义确认弹窗 */
+        .confirm-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .confirm-overlay.active {
+            display: flex;
+        }
+
+        .confirm-modal {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px;
+            max-width: 350px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .confirm-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .confirm-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .confirm-btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .confirm-btn.cancel {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .confirm-btn.cancel:hover {
+            background: #e0e0e0;
+        }
+
+        .confirm-btn.confirm {
+            background: linear-gradient(135deg, #ff6b9d, #c44569);
+            color: white;
+        }
+
+        .confirm-btn.confirm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 157, 0.4);
+        }
+
         @media (max-width: 600px) {
             .guide-modal {
                 margin: 15px;
@@ -225,31 +301,41 @@
             <div class="guide-content">
                 <div class="guide-step active" data-step="1">
                     <div class="step-number">第 1 步 / 共 5 步</div>
-                    <div class="guide-image">🌱 点击花盆播种</div>
+                    <div class="guide-image">
+                        <img src="img/guide/1.png" alt="第1步" onerror="this.parentElement.innerHTML='🌱 点击花盆播种'">
+                    </div>
                     <div class="guide-text">点击空花盆，选择你喜欢的花种开始播种吧！</div>
                 </div>
                 
                 <div class="guide-step" data-step="2">
                     <div class="step-number">第 2 步 / 共 5 步</div>
-                    <div class="guide-image">💧 浇水促进生长</div>
+                    <div class="guide-image">
+                        <img src="img/guide/2.png" alt="第2步" onerror="this.parentElement.innerHTML='💧 浇水促进生长'">
+                    </div>
                     <div class="guide-text">点击花朵可以查看生长状态，记得按时浇水哦！</div>
                 </div>
                 
                 <div class="guide-step" data-step="3">
                     <div class="step-number">第 3 步 / 共 5 步</div>
-                    <div class="guide-image">🌸 收获美丽花朵</div>
+                    <div class="guide-image">
+                        <img src="img/guide/3.png" alt="第3步" onerror="this.parentElement.innerHTML='🌸 收获美丽花朵'">
+                    </div>
                     <div class="guide-text">花朵成熟后点击即可收获，获得经验和花朵奖励！</div>
                 </div>
                 
                 <div class="guide-step" data-step="4">
                     <div class="step-number">第 4 步 / 共 5 步</div>
-                    <div class="guide-image">🏠 交易与兑换</div>
+                    <div class="guide-image">
+                        <img src="img/guide/4.png" alt="第4步" onerror="this.parentElement.innerHTML='🏠 交易与兑换'">
+                    </div>
                     <div class="guide-text">点击房子按钮可以查看收花统计，还能兑换道具哦！</div>
                 </div>
                 
                 <div class="guide-step" data-step="5">
                     <div class="step-number">第 5 步 / 共 5 步</div>
-                    <div class="guide-image">✨ 升级解锁更多</div>
+                    <div class="guide-image">
+                        <img src="img/guide/5.png" alt="第5步" onerror="this.parentElement.innerHTML='✨ 升级解锁更多'">
+                    </div>
                     <div class="guide-text">收获花朵获得经验，升级后可以解锁更多花盆！</div>
                 </div>
             </div>
@@ -260,6 +346,17 @@
                     <button class="nav-btn prev-btn" id="prevBtn" disabled>上一步</button>
                     <button class="nav-btn next-btn" id="nextBtn">下一步</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 自定义确认弹窗 -->
+    <div class="confirm-overlay" id="confirmOverlay">
+        <div class="confirm-modal">
+            <div class="confirm-title">确定要跳过新手引导吗？</div>
+            <div class="confirm-buttons">
+                <button class="confirm-btn cancel" id="confirmCancel">继续引导</button>
+                <button class="confirm-btn confirm" id="confirmConfirm">跳过引导</button>
             </div>
         </div>
     </div>
@@ -275,6 +372,9 @@
         const nextBtn = document.getElementById('nextBtn');
         const skipBtn = document.getElementById('skipBtn');
         const progressDots = document.getElementById('progressDots');
+        const confirmOverlay = document.getElementById('confirmOverlay');
+        const confirmCancel = document.getElementById('confirmCancel');
+        const confirmConfirm = document.getElementById('confirmConfirm');
         
         // 创建进度点
         for (let i = 1; i <= totalSteps; i++) {
@@ -321,11 +421,30 @@
             }
         });
         
-        // 跳过引导
+        // 显示确认弹窗
+        function showConfirm() {
+            confirmOverlay.classList.add('active');
+        }
+
+        // 隐藏确认弹窗
+        function hideConfirm() {
+            confirmOverlay.classList.remove('active');
+        }
+
+        // 跳过引导 - 显示弹窗
         skipBtn.addEventListener('click', () => {
-            if (confirm('确定要跳过新手引导吗？')) {
-                completeGuide();
-            }
+            showConfirm();
+        });
+
+        // 取消按钮
+        confirmCancel.addEventListener('click', () => {
+            hideConfirm();
+        });
+
+        // 确认按钮 - 跳过引导
+        confirmConfirm.addEventListener('click', () => {
+            hideConfirm();
+            completeGuide();
         });
         
         // 完成引导

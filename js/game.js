@@ -73,6 +73,11 @@
                     this.load.image(flower.id + stage, 'img/' + flower.folder + '/' + stage + '.png', { scale: 1 });
                 }
             }
+
+            // 加载音效
+            this.load.audio('planting', 'Sound effect/planting.wav');
+            this.load.audio('levelup', 'Sound effect/levelup.wav');
+            this.load.audio('growup', 'Sound effect/growup.wav');
         },
 
         /**
@@ -82,6 +87,21 @@
         create: function() {
             var self = this;
             var scene = this;
+            
+            // 音效对象
+            var soundPlanting = this.sound.add('planting');
+            var soundLevelup = this.sound.add('levelup');
+            var soundGrowup = this.sound.add('growup');
+            
+            // 将音效暴露给外部使用
+            this.soundEffects = {
+                planting: soundPlanting,
+                levelup: soundLevelup,
+                growup: soundGrowup
+            };
+            
+            // 保存到全局变量，方便其他模块访问
+            window.FlowerGameSoundEffects = this.soundEffects;
             
             // 启用纹理过滤，优化缩放质量
             this.textures.get('background').setFilter(Phaser.Textures.FilterMode.LINEAR, Phaser.Textures.FilterMode.LINEAR);
@@ -104,7 +124,7 @@
 
             // ========== 背景 ==========
             var bg = scene.add.image(0, 0, 'background');
-            bg.setOrigin(0, 0);
+            bg.setOrigin(0.5, 0.5);
 
             /**
              * 自适应背景大小（覆盖整个屏幕）
@@ -115,8 +135,8 @@
                 var scaleY = scene.scale.height / img.height;
                 var scale = Math.max(scaleX, scaleY);
                 bg.setScale(scale);
-                bg.x = (scene.scale.width - bg.displayWidth) / 2;
-                bg.y = (scene.scale.height - bg.displayHeight) / 2;
+                bg.x = scene.scale.width / 2;
+                bg.y = scene.scale.height / 2;
             }
             resizeBackground();
             scene.scale.on('resize', resizeBackground);
@@ -193,8 +213,7 @@
 
             /**
              * 更新花仙子位置（窗口大小变化时）
-             * 使用屏幕百分比定位，方便手动调整
-             * 调整 leftPct 和 topPct 即可改变位置
+             * 位于房子图层的最右边上方
              */
             function positionFairy() {
                 var fImg = scene.textures.get('npcFairy').getSourceImage();
@@ -205,12 +224,9 @@
                 var fairyScale = (scene.scale.width / 7) / fImg.width;
                 npcFairy.setScale(fairyScale);
 
-                // 手动调整这两个百分比值（0~1）
-                var leftPct = 0.5;  // 距离左边 50%
-                var topPct = 0.13;   // 距离顶部 13%
-
-                npcFairy.x = scene.scale.width * leftPct;
-                npcFairy.y = scene.scale.height * topPct;
+                // 定位在房子的最右边上方
+                npcFairy.x = house.x + house.displayWidth * 0.5 - npcFairy.displayWidth * 0.2;
+                npcFairy.y = house.y - house.displayHeight * 0.5 - npcFairy.displayHeight * 0.5;
             }
             positionFairy();
 
@@ -460,11 +476,22 @@
                         state.unlockedPotCount = cfg.TOTAL_POTS;
                         applyUnlockedStateToPots();
                         ui.showLevelUpToast(state.level, true);
+                        
+                        // 播放升级音效
+                        if (window.FlowerGameSoundEffects && window.FlowerGameSoundEffects.levelup) {
+                            window.FlowerGameSoundEffects.levelup.play();
+                        }
+                        
                         break;
                     }
 
                     // 显示升级提示
                     ui.showLevelUpToast(state.level, false);
+                    
+                    // 播放升级音效
+                    if (window.FlowerGameSoundEffects && window.FlowerGameSoundEffects.levelup) {
+                        window.FlowerGameSoundEffects.levelup.play();
+                    }
                 }
 
                 ui.render(state);
@@ -542,7 +569,7 @@
         width: 360,
         height: 640,
         parent: '',
-        backgroundColor: '#000000',
+        backgroundColor: 'transparent',
         scale: {
             mode: Phaser.Scale.RESIZE,
             autoCenter: Phaser.Scale.CENTER_BOTH,

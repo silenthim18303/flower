@@ -124,6 +124,11 @@
         this.currentStage = 0;
         this.showStageSafely(0);
         this.startGrowing();
+        
+        // 播放播种音效
+        if (window.FlowerGameSoundEffects && window.FlowerGameSoundEffects.planting) {
+            window.FlowerGameSoundEffects.planting.play();
+        }
     };
 
     /**
@@ -207,6 +212,11 @@
         this.currentStage++;
         this.syncStageTransforms();
         this.showStageSafely(this.currentStage);
+        
+        // 播放生长音效
+        if (window.FlowerGameSoundEffects && window.FlowerGameSoundEffects.growup) {
+            window.FlowerGameSoundEffects.growup.play();
+        }
     };
 
     /**
@@ -228,6 +238,11 @@
         if (this.currentStage >= this.growthStages.length - 1) {
             this.stopGrowing();
         }
+        
+        // 播放生长音效
+        if (window.FlowerGameSoundEffects && window.FlowerGameSoundEffects.growup) {
+            window.FlowerGameSoundEffects.growup.play();
+        }
 
         return true;
     };
@@ -248,6 +263,12 @@
         this.syncStageTransforms();
         this.showStageSafely(this.currentStage);
         this.stopGrowing();
+        
+        // 播放生长音效
+        if (window.FlowerGameSoundEffects && window.FlowerGameSoundEffects.growup) {
+            window.FlowerGameSoundEffects.growup.play();
+        }
+        
         return true;
     };
 
