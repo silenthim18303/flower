@@ -7,10 +7,19 @@
     <script>
         (function() {
             try {
+                // 检查是否已完成新手引导
+                const guideCompleted = localStorage.getItem('flower_guide_completed') === 'true';
+                if (!guideCompleted) {
+                    // 未完成引导，跳转到引导页面
+                    window.location.href = 'guide.html';
+                    return;
+                }
+                
                 if (window.sessionStorage && sessionStorage.getItem('flower_boot_loaded') === '1') {
                     document.documentElement.classList.add('skip-boot-loading');
                 }
             } catch (e) {
+                console.error('引导检查失败:', e);
             }
         })();
     </script>

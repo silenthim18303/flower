@@ -63,7 +63,7 @@
             this.load.image('pot', 'img/背景/花盆.png');
             this.load.image('potLocked', 'img/背景/未解锁花盆.png');
             this.load.image('house', 'img/背景/房子.png');
-            this.load.image('npcFarmer', 'img/npc/花农.png');
+            this.load.image('npcFarmer', 'img/npc/花农2.png');
 
             // 加载各花种5个阶段的图片
             for (var i = 0; i < cfg.FLOWER_TYPES.length; i++) {
@@ -138,6 +138,7 @@
 
             /**
              * 更新花农位置（窗口大小变化时）
+             * 放在左下角，距离底部10%高度
              */
             function positionFarmer() {
                 var nImg = scene.textures.get('npcFarmer').getSourceImage();
@@ -146,9 +147,9 @@
                 }
 
                 var npcScale = (scene.scale.width / 5.5) / nImg.width;
-                npcFarmer.setScale(npcScale);
-                npcFarmer.x = house.x + house.displayWidth * 0.5;
-                npcFarmer.y = house.y + house.displayHeight * 0.5;
+                npcFarmer.setScale(npcScale * 1.2); // 放大20%
+                npcFarmer.x = npcFarmer.displayWidth * 0.5 + 10;
+                npcFarmer.y = scene.scale.height * 0.9;
             }
             positionFarmer();
 

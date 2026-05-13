@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>新手引导</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            background: url('img/背景/背景.png') center center / cover no-repeat fixed;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .guide-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fairy-character {
+            position: absolute;
+            bottom: 50px;
+            right: 50px;
+            width: 120px;
+            height: auto;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .guide-modal {
+            position: relative;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+        }
+
+        .guide-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .guide-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff6b9d;
+            margin-bottom: 8px;
+        }
+
+        .guide-subtitle {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .guide-content {
+            margin-bottom: 30px;
+        }
+
+        .guide-step {
+            display: none;
+        }
+
+        .guide-step.active {
+            display: block;
+        }
+
+        .step-number {
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 15px;
+        }
+
+        .guide-image {
+            width: 100%;
+            height: 200px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #666;
+            border: 2px dashed #ddd;
+        }
+
+        .guide-text {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            text-align: center;
+        }
+
+        .guide-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .progress-dots {
+            display: flex;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ddd;
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+            background: #ff6b9d;
+            width: 20px;
+            border-radius: 5px;
+        }
+
+        .nav-btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .prev-btn {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .prev-btn:hover:not(:disabled) {
+            background: #e0e0e0;
+        }
+
+        .next-btn {
+            background: linear-gradient(135deg, #ff6b9d, #c44569);
+            color: white;
+        }
+
+        .next-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 157, 0.4);
+        }
+
+        .skip-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .skip-btn:hover {
+            color: #333;
+        }
+
+        @media (max-width: 600px) {
+            .guide-modal {
+                margin: 15px;
+                padding: 20px;
+            }
+
+            .guide-title {
+                font-size: 20px;
+            }
+
+            .guide-text {
+                font-size: 14px;
+            }
+
+            .fairy-character {
+                width: 90px;
+                bottom: 30px;
+                right: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="guide-container">
+        <img src="img/npc/花仙子.png" alt="花仙子" class="fairy-character" onerror="this.style.display='none'">
+        
+        <div class="guide-modal">
+            <button class="skip-btn" id="skipBtn">跳过引导</button>
+            
+            <div class="guide-header">
+                <div class="guide-title">欢迎来到花园！</div>
+                <div class="guide-subtitle">让花仙子带你开启种花之旅</div>
+            </div>
+            
+            <div class="guide-content">
+                <div class="guide-step active" data-step="1">
+                    <div class="step-number">第 1 步 / 共 5 步</div>
+                    <div class="guide-image">🌱 点击花盆播种</div>
+                    <div class="guide-text">点击空花盆，选择你喜欢的花种开始播种吧！</div>
+                </div>
+                
+                <div class="guide-step" data-step="2">
+                    <div class="step-number">第 2 步 / 共 5 步</div>
+                    <div class="guide-image">💧 浇水促进生长</div>
+                    <div class="guide-text">点击花朵可以查看生长状态，记得按时浇水哦！</div>
+                </div>
+                
+                <div class="guide-step" data-step="3">
+                    <div class="step-number">第 3 步 / 共 5 步</div>
+                    <div class="guide-image">🌸 收获美丽花朵</div>
+                    <div class="guide-text">花朵成熟后点击即可收获，获得经验和花朵奖励！</div>
+                </div>
+                
+                <div class="guide-step" data-step="4">
+                    <div class="step-number">第 4 步 / 共 5 步</div>
+                    <div class="guide-image">🏠 交易与兑换</div>
+                    <div class="guide-text">点击房子按钮可以查看收花统计，还能兑换道具哦！</div>
+                </div>
+                
+                <div class="guide-step" data-step="5">
+                    <div class="step-number">第 5 步 / 共 5 步</div>
+                    <div class="guide-image">✨ 升级解锁更多</div>
+                    <div class="guide-text">收获花朵获得经验，升级后可以解锁更多花盆！</div>
+                </div>
+            </div>
+            
+            <div class="guide-nav">
+                <div class="progress-dots" id="progressDots"></div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="nav-btn prev-btn" id="prevBtn" disabled>上一步</button>
+                    <button class="nav-btn next-btn" id="nextBtn">下一步</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 引导步骤管理
+        let currentStep = 1;
+        const totalSteps = 5;
+        
+        // DOM元素
+        const steps = document.querySelectorAll('.guide-step');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const skipBtn = document.getElementById('skipBtn');
+        const progressDots = document.getElementById('progressDots');
+        
+        // 创建进度点
+        for (let i = 1; i <= totalSteps; i++) {
+            const dot = document.createElement('div');
+            dot.className = `dot ${i === currentStep ? 'active' : ''}`;
+            progressDots.appendChild(dot);
+        }
+        
+        // 更新步骤显示
+        function updateStep() {
+            steps.forEach(step => {
+                step.classList.remove('active');
+                if (parseInt(step.dataset.step) === currentStep) {
+                    step.classList.add('active');
+                }
+            });
+            
+            // 更新进度点
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach((dot, index) => {
+                dot.className = `dot ${index + 1 === currentStep ? 'active' : ''}`;
+            });
+            
+            // 更新按钮状态
+            prevBtn.disabled = currentStep === 1;
+            nextBtn.textContent = currentStep === totalSteps ? '开始游戏' : '下一步';
+        }
+        
+        // 下一步
+        nextBtn.addEventListener('click', () => {
+            if (currentStep === totalSteps) {
+                completeGuide();
+            } else {
+                currentStep++;
+                updateStep();
+            }
+        });
+        
+        // 上一步
+        prevBtn.addEventListener('click', () => {
+            if (currentStep > 1) {
+                currentStep--;
+                updateStep();
+            }
+        });
+        
+        // 跳过引导
+        skipBtn.addEventListener('click', () => {
+            if (confirm('确定要跳过新手引导吗？')) {
+                completeGuide();
+            }
+        });
+        
+        // 完成引导
+        function completeGuide() {
+            // 标记引导已完成
+            localStorage.setItem('flower_guide_completed', 'true');
+            // 跳转到主界面
+            window.location.href = 'index.html';
+        }
+        
+        // 键盘导航
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' && currentStep > 1) {
+                currentStep--;
+                updateStep();
+            } else if (e.key === 'ArrowRight' && currentStep < totalSteps) {
+                currentStep++;
+                updateStep();
+            } else if (e.key === 'Enter') {
+                if (currentStep === totalSteps) {
+                    completeGuide();
+                } else {
+                    currentStep++;
+                    updateStep();
+                }
+            }
+        });
+        
+        // 初始化
+        updateStep();
+    </script>
+</body>
+</html>
