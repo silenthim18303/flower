@@ -35,6 +35,23 @@
     });
 
     /**
+     * 检查是否有弹窗打开
+     * 防止点击事件穿透到Phaser场景
+     * @returns {boolean} 是否有弹窗打开
+     */
+    window.isAnyModalOpen = function() {
+        // 检查所有弹窗
+        var modals = ['collect-modal', 'daily-task-modal', 'golden-exchange-modal', 'help-modal', 'settings-modal'];
+        for (var i = 0; i < modals.length; i++) {
+            var modal = document.getElementById(modals[i]);
+            if (modal && modal.classList.contains('show')) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    /**
      * 游戏主场景
      * Phaser 3 Scene 类，包含 preload/create/update 生命周期
      */
@@ -150,6 +167,7 @@
             house.setScale(houseScale);
             house.setInteractive({ useHandCursor: true });
             house.on('pointerdown', function() {
+                if (window.isAnyModalOpen()) return;
                 ui.showCollectModal(state);
             });
 
@@ -170,6 +188,7 @@
             npcFarmer.setOrigin(0.5, 1);
             npcFarmer.setInteractive({ useHandCursor: true });
             npcFarmer.on('pointerdown', function() {
+                if (window.isAnyModalOpen()) return;
                 ui.showGoldenExchangeModal(state);
             });
 
@@ -201,6 +220,7 @@
             npcFairy.setOrigin(0.5, 0.5);
             npcFairy.setInteractive({ useHandCursor: true });
             npcFairy.on('pointerdown', function() {
+                if (window.isAnyModalOpen()) return;
                 ui.showHelpModal();
             });
 
@@ -573,8 +593,8 @@
     // ========== Phaser 3 游戏实例 ==========
     var game = new Phaser.Game({
     type: Phaser.WEBGL,          // 强制WebGL，画质最好
-    width: 1080,                 // 保持你要的高清分辨率
-    height: 1920,
+    width: 1440,                 // 保持你要的高清分辨率
+    height: 2560,
     parent: '',
     backgroundColor: '#000000',  // 背景黑色，和你一致
 

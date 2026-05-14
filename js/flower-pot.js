@@ -95,6 +95,11 @@
             return;
         }
 
+        // 弹窗打开时忽略点击
+        if (window.isAnyModalOpen && window.isAnyModalOpen()) {
+            return;
+        }
+
         // 空花盆 -> 播种
         if (this.currentStage === -1) {
             var selectedFlowerType = typeof this.getSelectedFlowerType === 'function'
