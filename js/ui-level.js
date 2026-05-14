@@ -83,6 +83,7 @@
 
         var currentName = ctx.refs.playerNameEl.textContent;
         var parent = ctx.refs.playerNameEl.parentNode;
+        var confirmed = false;
 
         // 创建输入框替换按钮
         var input = document.createElement('input');
@@ -91,6 +92,7 @@
         input.maxLength = 8;
         input.className = 'name-input';
         parent.replaceChild(input, ctx.refs.playerNameEl);
+        ctx.refs.playerNameEl = input;
         input.focus();
         input.select();
 
@@ -99,6 +101,9 @@
          * 过滤输入、限制长度、恢复按钮、触发回调
          */
         function confirm() {
+            if (confirmed) return;
+            confirmed = true;
+
             var newName = sanitizeName(input.value);
             if (newName.length === 0) {
                 newName = currentName;
@@ -119,6 +124,8 @@
                 confirm();
             } else if (e.key === 'Escape') {
                 e.preventDefault();
+                if (confirmed) return;
+                confirmed = true;
                 restoreButton(ctx, parent, currentName);
             }
         });

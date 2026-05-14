@@ -32,6 +32,11 @@
             '      <span class="help-item-icon">📖</span>',
             '      <span class="help-item-text">重玩新手教程</span>',
             '    </button>',
+            '    <button class="help-item" type="button" id="help-minesweeper">',
+            '      <span class="help-item-icon">🎮️</span>',
+            '      <span class="help-item-text">寻花</span>',
+            '    </button>',
+            '    <div class="help-item-tip"></div>',
     '    <div class="help-section-title">物品介绍</div>',
     '    <button class="help-item" type="button" id="help-watering">',
     '      <span class="help-item-icon">💧</span>',
@@ -81,6 +86,14 @@
                 }
                 // 跳转到新手教程页面
                 window.location.href = 'guide.html';
+            };
+        }
+
+        // 绑定寻花（扫雷）按钮
+        var minesweeperBtn = document.getElementById('help-minesweeper');
+        if (minesweeperBtn) {
+            minesweeperBtn.onclick = function() {
+                window.location.href = 'minesweeper-prepare.html';
             };
         }
         
@@ -313,6 +326,21 @@
                 text-transform: uppercase;
                 margin: 20px 0 10px 0;
                 padding-left: 10px;
+            }
+
+            .help-item-img {
+                width: 24px;
+                height: 24px;
+                object-fit: contain;
+                flex-shrink: 0;
+            }
+
+            .help-item-tip {
+                font-size: 11px;
+                color: #e67e22;
+                padding: 0 12px;
+                margin-top: -4px;
+                margin-bottom: 4px;
             }
         `;
         

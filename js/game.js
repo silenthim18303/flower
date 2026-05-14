@@ -194,7 +194,7 @@
 
             /**
              * 更新花农位置（窗口大小变化时）
-             * 放在房子右侧，允许与房子重叠
+             * 紧贴房子右侧，与房子重叠，花农在上层
              */
             function positionFarmer() {
                 var nImg = scene.textures.get('npcFarmer').getSourceImage();
@@ -203,15 +203,11 @@
                 }
 
                 var npcScale = (scene.scale.width / 5.5) / nImg.width;
-                npcFarmer.setScale(npcScale * 1.2); // 放大20%
+                npcFarmer.setScale(npcScale);
                 
-                // 基于房子的位置来定位花农
-                var houseX = house.x;
-                var houseWidth = house.displayWidth;
-                
-                // 将花农定位在房子右侧，重叠约1/3的宽度
-                npcFarmer.x = houseX + houseWidth * 0.7; 
-                npcFarmer.y = scene.scale.height * 0.6; // 垂直位置调整为屏幕高度的60%
+                // 紧贴房子右侧
+                npcFarmer.x = house.x + house.displayWidth * 0.5 + npcFarmer.displayWidth * 0.3;
+                npcFarmer.y = house.y + house.displayHeight * 0.5 - scene.scale.height * 0.05;
             }
             positionFarmer();
 

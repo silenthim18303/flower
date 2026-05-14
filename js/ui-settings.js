@@ -54,13 +54,11 @@
                     currentTrackIndex = idx;
                 }
             }
-            var savedTime = localStorage.getItem('flower_bgm_time');
-            if (savedTime !== null) {
-                var t = parseFloat(savedTime);
-                if (!isNaN(t)) {
-                    // 恢复播放位置（在 play 后设置）
-                    audio && (audio.currentTime = t);
-                }
+            var savedPlaying = localStorage.getItem('flower_bgm_playing');
+            if (savedPlaying === 'false') {
+                isPlaying = false;
+            } else {
+                isPlaying = true;
             }
         } catch (e) {}
 
@@ -82,8 +80,11 @@
             }
         }, 2000);
 
-        // 自动播放
-        playCurrentTrack();
+        // 根据上次状态决定是否播放
+        if (isPlaying) {
+            playCurrentTrack();
+        }
+        updateMusicBtn();
     }
 
     /**
@@ -142,6 +143,7 @@
         try {
             localStorage.setItem('flower_bgm_volume', volume.toString());
             localStorage.setItem('flower_bgm_index', currentTrackIndex.toString());
+            localStorage.setItem('flower_bgm_playing', isPlaying.toString());
             if (audio) {
                 localStorage.setItem('flower_bgm_time', audio.currentTime.toString());
             }
@@ -252,6 +254,9 @@
             '        <div class="music-status" id="music-status">点击 ♪ 按钮播放</div>',
             '      </div>',
             '    </div>',
+            '    <div class="settings-section">',
+            '      <button class="settings-about-btn" id="about-btn" type="button">关于游戏</button>',
+            '    </div>',
             '  </div>',
             '  <button class="settings-modal-close" type="button">关闭</button>',
             '</div>'
@@ -270,7 +275,59 @@
             closeBtn.onclick = hideSettingsModal;
         }
 
+        var aboutBtn = settingsModal.querySelector('#about-btn');
+        if (aboutBtn) {
+            aboutBtn.onclick = function() {
+                showAboutModal();
+            };
+        }
+
         document.body.appendChild(settingsModal);
+    }
+
+    /** 关于游戏弹窗引用 */
+    var aboutModal = null;
+
+    /**
+     * 显示关于游戏弹窗
+     */
+    function showAboutModal() {
+        if (aboutModal) {
+            aboutModal.classList.add('show');
+            return;
+        }
+
+        aboutModal = document.createElement('div');
+        aboutModal.id = 'about-modal';
+        aboutModal.innerHTML = [
+            '<div class="about-modal-mask" data-close="1"></div>',
+            '<div class="about-modal-card">',
+            '  <div class="about-icon">🌸</div>',
+            '  <div class="about-title">花期乘风录</div>',
+            '  <div class="about-version">v0.0.1 Beta</div>',
+            '  <div class="about-desc">基于 Phaser 3 引擎开发</div>',
+            '  <button class="about-close-btn" type="button">确定</button>',
+            '</div>'
+        ].join('');
+
+        aboutModal.addEventListener('click', function(e) {
+            if (e.target.getAttribute('data-close') === '1') {
+                aboutModal.classList.remove('show');
+            }
+        });
+
+        var aboutCloseBtn = aboutModal.querySelector('.about-close-btn');
+        if (aboutCloseBtn) {
+            aboutCloseBtn.onclick = function() {
+                aboutModal.classList.remove('show');
+            };
+        }
+
+        document.body.appendChild(aboutModal);
+
+        requestAnimationFrame(function() {
+            aboutModal.classList.add('show');
+        });
     }
 
     /**
@@ -385,6 +442,103 @@
             
             .settings-modal-close:hover {
                 background: #dce4f0;
+            }
+
+            .settings-about-btn {
+                display: block;
+                width: 100%;
+                padding: 12px;
+                border: none;
+                border-radius: 12px;
+                background: #f7faff;
+                color: #466288;
+                font-size: 14px;
+                font-weight: 700;
+                cursor: pointer;
+                font-family: "Microsoft YaHei", sans-serif;
+                border: 1px solid #e4ecf8;
+            }
+
+            .settings-about-btn:hover {
+                background: #eef4ff;
+            }
+
+            #about-modal {
+                position: fixed;
+                inset: 0;
+                z-index: 44;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                opacity: 0;
+                visibility: hidden;
+                transition: opacity 220ms ease;
+            }
+
+            #about-modal.show {
+                opacity: 1;
+                visibility: visible;
+            }
+
+            .about-modal-mask {
+                position: absolute;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.5);
+            }
+
+            .about-modal-card {
+                position: relative;
+                background: #fff;
+                border-radius: 20px;
+                padding: 30px 24px;
+                max-width: 280px;
+                width: 85%;
+                text-align: center;
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+                transform: scale(0.9);
+                transition: transform 220ms ease;
+            }
+
+            #about-modal.show .about-modal-card {
+                transform: scale(1);
+            }
+
+            .about-icon {
+                font-size: 48px;
+                margin-bottom: 12px;
+            }
+
+            .about-title {
+                font-size: 20px;
+                font-weight: 700;
+                color: #233652;
+                margin-bottom: 8px;
+            }
+
+            .about-version {
+                font-size: 14px;
+                color: #f5a623;
+                font-weight: 700;
+                margin-bottom: 8px;
+            }
+
+            .about-desc {
+                font-size: 13px;
+                color: #5a7194;
+                margin-bottom: 20px;
+            }
+
+            .about-close-btn {
+                width: 100%;
+                height: 40px;
+                border: none;
+                border-radius: 12px;
+                background: linear-gradient(135deg, #f5a623, #e89b1d);
+                color: #fff;
+                font-size: 15px;
+                font-weight: 700;
+                cursor: pointer;
+                font-family: "Microsoft YaHei", sans-serif;
             }
         `;
         

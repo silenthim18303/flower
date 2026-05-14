@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>花期乘风录 - 寻花</title>
+    <link rel="icon" href="img/金花/2.png" type="image/png">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            background: #090d14 url('img/背景/加载背景.png') center center / cover no-repeat fixed;
+            min-height: 100vh;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: "Microsoft YaHei", sans-serif;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 400px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 20px;
+            padding: 28px 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 24px;
+        }
+
+        .rules {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .rules-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #f5a623;
+            margin-bottom: 12px;
+        }
+
+        .rule-item {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.8;
+            padding-left: 16px;
+            position: relative;
+        }
+
+        .rule-item::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: #f5a623;
+        }
+
+        .cost-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            padding: 14px;
+            background: rgba(245, 166, 35, 0.1);
+            border-radius: 12px;
+            border: 1px solid rgba(245, 166, 35, 0.2);
+        }
+
+        .cost-icon {
+            font-size: 32px;
+        }
+
+        .cost-text {
+            text-align: left;
+        }
+
+        .cost-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .cost-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #f5a623;
+        }
+
+        .balance {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 20px;
+        }
+
+        .balance-value {
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .balance-value.insufficient {
+            color: #e74c3c;
+        }
+
+        .warning {
+            font-size: 13px;
+            color: #e74c3c;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .warning.show {
+            display: block;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn {
+            width: 100%;
+            height: 46px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: "Microsoft YaHei", sans-serif;
+            transition: transform 120ms ease;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #f5a623, #e89b1d);
+            color: #fff;
+        }
+
+        .btn-primary:disabled {
+            background: #555;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+    </style>
+    <script src="js/config.js"></script>
+    <script src="js/state.js"></script>
+</head>
+<body>
+    <div class="card">
+        <img class="icon-img" src="img/寻花/金花.png" alt="寻花" style="width:80px;height:80px;margin-bottom:16px;">
+        <div class="title">寻花</div>
+        <div class="subtitle">寻找隐藏的金花</div>
+
+        <div class="rules">
+            <div class="rules-title">游戏规则</div>
+            <div class="rule-item">草地中隐藏着金花，点击揭开草皮探索</div>
+            <div class="rule-item">数字表示周围隐藏的金花数量</div>
+            <div class="rule-item">右键或长按标记你认为有金花的位置</div>
+            <div class="rule-item">揭开所有安全草皮即可通关</div>
+            <div class="rule-item">揭开到金花则游戏失败</div>
+        </div>
+
+        <div class="cost-section">
+            <div class="cost-icon">🎫</div>
+            <div class="cost-text">
+                <div class="cost-label">门票费用</div>
+                <div class="cost-value">10 朵花</div>
+            </div>
+        </div>
+
+        <div class="balance">
+            当前花朵：<span class="balance-value" id="balance-value">0</span> 朵
+        </div>
+
+        <div class="warning" id="warning">花朵不足，无法开始游戏</div>
+
+        <div class="btn-group">
+            <button class="btn btn-primary" id="start-btn" type="button" disabled>开始游戏</button>
+            <button class="btn btn-secondary" id="back-btn" type="button">返回主菜单</button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            var COST = 10;
+            var state = window.FlowerState;
+            var stateService = window.FlowerStateService;
+
+            var balanceEl = document.getElementById('balance-value');
+            var warningEl = document.getElementById('warning');
+            var startBtn = document.getElementById('start-btn');
+            var backBtn = document.getElementById('back-btn');
+
+            // 加载存档
+            if (stateService && typeof stateService.loadProgress === 'function') {
+                stateService.loadProgress();
+            }
+
+            updateUI();
+
+            startBtn.onclick = function() {
+                if (startBtn.disabled) return;
+
+                var total = getTotalFlowers();
+                if (total < COST) {
+                    warningEl.classList.add('show');
+                    return;
+                }
+
+                // 扣除花朵
+                spendFlowers(COST);
+
+                // 保存
+                if (stateService && typeof stateService.saveProgress === 'function') {
+                    stateService.saveProgress();
+                }
+
+                // 进入游戏
+                window.location.href = 'minesweeper.html';
+            };
+
+            backBtn.onclick = function() {
+                window.location.href = 'index.html';
+            };
+
+            function getTotalFlowers() {
+                var total = 0;
+                if (state && state.warehouse) {
+                    var types = ['rose', 'daisy', 'peony', 'golden'];
+                    for (var i = 0; i < types.length; i++) {
+                        total += state.warehouse[types[i]] || 0;
+                    }
+                }
+                return total;
+            }
+
+            function spendFlowers(cost) {
+                var remain = cost;
+                var types = ['rose', 'daisy', 'peony', 'golden'];
+                for (var i = 0; i < types.length; i++) {
+                    var flowerId = types[i];
+                    var count = state.warehouse[flowerId] || 0;
+                    if (count <= 0) continue;
+                    var used = Math.min(count, remain);
+                    state.warehouse[flowerId] = count - used;
+                    remain -= used;
+                    if (remain <= 0) break;
+                }
+            }
+
+            function updateUI() {
+                var total = getTotalFlowers();
+                balanceEl.textContent = total;
+
+                if (total < COST) {
+                    balanceEl.classList.add('insufficient');
+                    warningEl.classList.add('show');
+                    startBtn.disabled = true;
+                } else {
+                    balanceEl.classList.remove('insufficient');
+                    warningEl.classList.remove('show');
+                    startBtn.disabled = false;
+                }
+            }
+        })();
+    </script>
+</body>
+</html>

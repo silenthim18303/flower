@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>花期乘风录 - 寻花</title>
+    <link rel="icon" href="img/金花/2.png" type="image/png">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            background: #090d14 url('img/背景/加载背景.png') center center / cover no-repeat fixed;
+            min-height: 100vh;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: "Microsoft YaHei", sans-serif;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 10px;
+        }
+
+        .header {
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            border-radius: 14px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-btn {
+            flex-shrink: 0;
+            height: 34px;
+            padding: 0 12px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .back-btn:active {
+            transform: scale(0.96);
+        }
+
+        .title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .game-info {
+            display: flex;
+            gap: 16px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .info-icon {
+            font-size: 18px;
+        }
+
+        .info-value {
+            color: #f5a623;
+            min-width: 24px;
+        }
+
+        .tip {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .board-container {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
+            padding: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            gap: 2px;
+        }
+
+        .cell {
+            width: 38px;
+            height: 38px;
+            border: none;
+            border-radius: 4px;
+            background: #4a7c59 url('img/寻花/草地.png') center center / cover no-repeat;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            transition: transform 0.15s ease;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .cell:active {
+            transform: scale(0.95);
+        }
+
+        .cell.revealed {
+            background: #2d4a35;
+            cursor: default;
+        }
+
+        .cell.revealed:active {
+            transform: none;
+        }
+
+        .cell.golden {
+            background: #f5a623 url('img/寻花/金花.png') center center / cover no-repeat;
+        }
+
+        .cell.flagged {
+            background: #e67e22 url('img/寻花/草地.png') center center / cover no-repeat;
+            position: relative;
+        }
+
+        .cell[data-num="1"] { color: #3498db; }
+        .cell[data-num="2"] { color: #2ecc71; }
+        .cell[data-num="3"] { color: #e74c3c; }
+        .cell[data-num="4"] { color: #9b59b6; }
+        .cell[data-num="5"] { color: #e67e22; }
+        .cell[data-num="6"] { color: #1abc9c; }
+        .cell[data-num="7"] { color: #ecf0f1; }
+        .cell[data-num="8"] { color: #95a5a6; }
+
+        .footer {
+            margin-top: 20px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .game-btn {
+            height: 40px;
+            padding: 0 20px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        .game-btn:active {
+            transform: scale(0.96);
+        }
+
+        .game-btn.primary {
+            background: linear-gradient(135deg, #f5a623, #e89b1d);
+            border: none;
+        }
+
+        .result-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        .result-modal.show {
+            display: flex;
+        }
+
+        .result-card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            max-width: 300px;
+            width: 85%;
+            animation: popIn 0.3s ease;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .result-icon {
+            font-size: 64px;
+            margin-bottom: 12px;
+        }
+
+        .result-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #233652;
+            margin-bottom: 8px;
+        }
+
+        .result-text {
+            font-size: 14px;
+            color: #5a7194;
+            margin-bottom: 20px;
+        }
+
+        .result-btn {
+            width: 100%;
+            height: 44px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #f5a623, #e89b1d);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        @media (max-width: 380px) {
+            .cell {
+                width: 34px;
+                height: 34px;
+                font-size: 14px;
+            }
+
+            .header {
+                padding: 10px 12px;
+            }
+
+            .title {
+                font-size: 16px;
+            }
+        }
+
+        @media (max-width: 340px) {
+            .cell {
+                width: 30px;
+                height: 30px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <button class="back-btn" type="button" id="back-garden-btn">返回花园</button>
+            <div class="title">寻花</div>
+        </div>
+        <div class="game-info">
+            <div class="info-item">
+                <span class="info-icon">🌸</span>
+                <span class="info-value" id="golden-count">10</span>
+            </div>
+            <div class="info-item">
+                <span class="info-icon">⏱</span>
+                <span class="info-value" id="timer">0</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="tip">揭开所有草皮，不要发现隐藏的金花！</div>
+
+    <div class="board-container">
+        <div class="board" id="board"></div>
+    </div>
+
+    <div class="footer">
+        <button class="game-btn primary" id="new-game-btn" type="button">新游戏</button>
+    </div>
+
+    <div class="result-modal" id="result-modal">
+        <div class="result-card">
+            <div class="result-icon" id="result-icon"></div>
+            <div class="result-title" id="result-title"></div>
+            <div class="result-text" id="result-text"></div>
+            <button class="result-btn" id="result-btn" type="button">返回花园</button>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/state.js"></script>
+    <script>
+        (function() {
+            var ROWS = 9;
+            var COLS = 9;
+            var GOLDEN_COUNT = 10;
+
+            var board = [];
+            var revealed = [];
+            var flagged = [];
+            var gameOver = false;
+            var gameStarted = false;
+            var firstClick = true;
+            var timerInterval = null;
+            var seconds = 0;
+
+            var boardEl = document.getElementById('board');
+            var goldenCountEl = document.getElementById('golden-count');
+            var timerEl = document.getElementById('timer');
+            var newGameBtn = document.getElementById('new-game-btn');
+            var backGardenBtn = document.getElementById('back-garden-btn');
+            var resultModal = document.getElementById('result-modal');
+            var resultIcon = document.getElementById('result-icon');
+            var resultTitle = document.getElementById('result-title');
+            var resultText = document.getElementById('result-text');
+            var resultBtn = document.getElementById('result-btn');
+
+            newGameBtn.onclick = function() {
+                initGame();
+            };
+
+            backGardenBtn.onclick = function() {
+                window.location.href = 'index.html';
+            };
+
+            resultBtn.onclick = function() {
+                window.location.href = 'minesweeper-prepare.html';
+            };
+
+            function initGame() {
+                board = [];
+                revealed = [];
+                flagged = [];
+                gameOver = false;
+                gameStarted = false;
+                firstClick = true;
+                seconds = 0;
+                clearInterval(timerInterval);
+                timerEl.textContent = '0';
+                goldenCountEl.textContent = GOLDEN_COUNT;
+                resultModal.classList.remove('show');
+
+                for (var r = 0; r < ROWS; r++) {
+                    board[r] = [];
+                    revealed[r] = [];
+                    flagged[r] = [];
+                    for (var c = 0; c < COLS; c++) {
+                        board[r][c] = 0;
+                        revealed[r][c] = false;
+                        flagged[r][c] = false;
+                    }
+                }
+
+                renderBoard();
+            }
+
+            function placeGolden(skipR, skipC) {
+                var placed = 0;
+                while (placed < GOLDEN_COUNT) {
+                    var r = Math.floor(Math.random() * ROWS);
+                    var c = Math.floor(Math.random() * COLS);
+                    if (board[r][c] === -1) continue;
+                    if (Math.abs(r - skipR) <= 1 && Math.abs(c - skipC) <= 1) continue;
+                    board[r][c] = -1;
+                    placed++;
+                }
+
+                for (var r = 0; r < ROWS; r++) {
+                    for (var c = 0; c < COLS; c++) {
+                        if (board[r][c] === -1) continue;
+                        var count = 0;
+                        for (var dr = -1; dr <= 1; dr++) {
+                            for (var dc = -1; dc <= 1; dc++) {
+                                var nr = r + dr;
+                                var nc = c + dc;
+                                if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && board[nr][nc] === -1) {
+                                    count++;
+                                }
+                            }
+                        }
+                        board[r][c] = count;
+                    }
+                }
+            }
+
+            function renderBoard() {
+                boardEl.innerHTML = '';
+                for (var r = 0; r < ROWS; r++) {
+                    for (var c = 0; c < COLS; c++) {
+                        var cell = document.createElement('div');
+                        cell.className = 'cell';
+                        cell.setAttribute('data-row', r);
+                        cell.setAttribute('data-col', c);
+
+                        cell.addEventListener('click', function() {
+                            handleCellClick(this);
+                        });
+
+                        cell.addEventListener('contextmenu', function(e) {
+                            e.preventDefault();
+                            handleRightClick(this);
+                        });
+
+                        var pressTimer = null;
+
+                        cell.addEventListener('touchstart', function(e) {
+                            this.setAttribute('data-longpress', '0');
+                            var self = this;
+                            pressTimer = setTimeout(function() {
+                                self.setAttribute('data-longpress', '1');
+                                handleRightClick(self);
+                            }, 300);
+                        });
+
+                        cell.addEventListener('touchend', function(e) {
+                            clearTimeout(pressTimer);
+                            if (this.getAttribute('data-longpress') === '1') {
+                                e.preventDefault();
+                            }
+                        });
+
+                        cell.addEventListener('touchmove', function() {
+                            clearTimeout(pressTimer);
+                        });
+
+                        boardEl.appendChild(cell);
+                    }
+                }
+            }
+
+            function handleCellClick(cellEl) {
+                if (gameOver) return;
+
+                // 长按后不触发点击
+                if (cellEl.getAttribute('data-longpress') === '1') {
+                    cellEl.setAttribute('data-longpress', '0');
+                    return;
+                }
+
+                var r = parseInt(cellEl.getAttribute('data-row'));
+                var c = parseInt(cellEl.getAttribute('data-col'));
+
+                if (flagged[r][c]) return;
+                if (revealed[r][c]) return;
+
+                if (firstClick) {
+                    firstClick = false;
+                    placeGolden(r, c);
+                    startTimer();
+                }
+
+                if (board[r][c] === -1) {
+                    gameOver = true;
+                    clearInterval(timerInterval);
+                    revealAllGolden();
+                    showResult(false);
+                    return;
+                }
+
+                revealCell(r, c);
+                autoFlag(r, c);
+                checkWin();
+            }
+
+            function handleRightClick(cellEl) {
+                if (gameOver) return;
+
+                var r = parseInt(cellEl.getAttribute('data-row'));
+                var c = parseInt(cellEl.getAttribute('data-col'));
+
+                if (revealed[r][c]) return;
+
+                flagged[r][c] = !flagged[r][c];
+                cellEl.classList.toggle('flagged');
+                cellEl.textContent = flagged[r][c] ? '🚩' : '';
+
+                updateGoldenCount();
+            }
+
+            function revealCell(r, c) {
+                if (r < 0 || r >= ROWS || c < 0 || c >= COLS) return;
+                if (revealed[r][c] || flagged[r][c]) return;
+
+                revealed[r][c] = true;
+                var idx = r * COLS + c;
+                var cellEl = boardEl.children[idx];
+                cellEl.classList.add('revealed');
+
+                if (board[r][c] > 0) {
+                    cellEl.textContent = board[r][c];
+                    cellEl.setAttribute('data-num', board[r][c]);
+                } else if (board[r][c] === 0) {
+                    for (var dr = -1; dr <= 1; dr++) {
+                        for (var dc = -1; dc <= 1; dc++) {
+                            revealCell(r + dr, c + dc);
+                        }
+                    }
+                }
+            }
+
+            /**
+             * 自动标雷
+             * 当某个数字周围的未揭开格子数等于该数字时，自动给这些格子插旗
+             * @param {number} r - 行
+             * @param {number} c - 列
+             */
+            function autoFlag(r, c) {
+                if (board[r][c] <= 0) return;
+
+                var unrevealedCells = [];
+                var flagCount = 0;
+
+                for (var dr = -1; dr <= 1; dr++) {
+                    for (var dc = -1; dc <= 1; dc++) {
+                        if (dr === 0 && dc === 0) continue;
+                        var nr = r + dr;
+                        var nc = c + dc;
+                        if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS) {
+                            if (!revealed[nr][nc]) {
+                                if (flagged[nr][nc]) {
+                                    flagCount++;
+                                } else {
+                                    unrevealedCells.push({ r: nr, c: nc });
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 剩余未标记数等于金花数，自动标记
+                if (unrevealedCells.length > 0 && board[r][c] - flagCount === unrevealedCells.length) {
+                    for (var i = 0; i < unrevealedCells.length; i++) {
+                        var cell = unrevealedCells[i];
+                        flagged[cell.r][cell.c] = true;
+                        var idx = cell.r * COLS + cell.c;
+                        var cellEl = boardEl.children[idx];
+                        cellEl.classList.add('flagged');
+                        cellEl.textContent = '🚩';
+                    }
+                    // 更新金花计数
+                    updateGoldenCount();
+                }
+            }
+
+            /**
+             * 更新金花计数显示
+             */
+            function updateGoldenCount() {
+                var flagCount = 0;
+                for (var i = 0; i < ROWS; i++) {
+                    for (var j = 0; j < COLS; j++) {
+                        if (flagged[i][j]) flagCount++;
+                    }
+                }
+                goldenCountEl.textContent = GOLDEN_COUNT - flagCount;
+            }
+
+            function revealAllGolden() {
+                for (var r = 0; r < ROWS; r++) {
+                    for (var c = 0; c < COLS; c++) {
+                        if (board[r][c] === -1) {
+                            var idx = r * COLS + c;
+                            var cellEl = boardEl.children[idx];
+                            cellEl.classList.add('golden');
+                            cellEl.textContent = '🌸';
+                        }
+                    }
+                }
+            }
+
+            function checkWin() {
+                var unrevealed = 0;
+                for (var r = 0; r < ROWS; r++) {
+                    for (var c = 0; c < COLS; c++) {
+                        if (!revealed[r][c]) unrevealed++;
+                    }
+                }
+                if (unrevealed === GOLDEN_COUNT) {
+                    gameOver = true;
+                    clearInterval(timerInterval);
+                    showResult(true);
+                }
+            }
+
+            function showResult(isWin) {
+                if (isWin) {
+                    resultIcon.textContent = '🎉';
+                    resultTitle.textContent = '恭喜通关！';
+                    resultText.textContent = '你成功找到了所有金花，用时 ' + seconds + ' 秒\n奖励：玫瑰花 +30';
+
+                    // 发放奖励：30朵玫瑰
+                    var state = window.FlowerState;
+                    var stateService = window.FlowerStateService;
+                    if (stateService && typeof stateService.loadProgress === 'function') {
+                        stateService.loadProgress();
+                    }
+                    if (state && state.warehouse) {
+                        state.warehouse.rose = (state.warehouse.rose || 0) + 30;
+                        if (stateService && typeof stateService.saveProgress === 'function') {
+                            stateService.saveProgress();
+                        }
+                    }
+                } else {
+                    resultIcon.textContent = '😢';
+                    resultTitle.textContent = '游戏失败';
+                    resultText.textContent = '不小心发现了隐藏的金花，再试试吧！';
+                }
+                resultModal.classList.add('show');
+            }
+
+            function startTimer() {
+                if (gameStarted) return;
+                gameStarted = true;
+                seconds = 0;
+                timerInterval = setInterval(function() {
+                    seconds++;
+                    timerEl.textContent = seconds;
+                }, 1000);
+            }
+
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+            });
+
+            initGame();
+        })();
+    </script>
+</body>
+</html>
