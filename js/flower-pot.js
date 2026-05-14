@@ -124,6 +124,11 @@
         this.currentStage = 0;
         this.showStageSafely(0);
         this.startGrowing();
+        
+        // 播放种植音效
+        if (window.flowerSounds && window.flowerSounds.planting) {
+            window.flowerSounds.planting.play();
+        }
     };
 
     /**
@@ -206,6 +211,11 @@
         this.stageSprites[this.currentStage].setVisible(false);
         this.currentStage++;
         this.syncStageTransforms();
+        
+        // 播放生长音效
+        if (window.flowerSounds && window.flowerSounds.growup) {
+            window.flowerSounds.growup.play();
+        }
         this.showStageSafely(this.currentStage);
     };
 
@@ -224,6 +234,11 @@
         this.currentStage++;
         this.syncStageTransforms();
         this.showStageSafely(this.currentStage);
+
+        // 播放生长音效
+        if (window.flowerSounds && window.flowerSounds.growup) {
+            window.flowerSounds.growup.play();
+        }
 
         if (this.currentStage >= this.growthStages.length - 1) {
             this.stopGrowing();
@@ -248,6 +263,12 @@
         this.syncStageTransforms();
         this.showStageSafely(this.currentStage);
         this.stopGrowing();
+        
+        // 播放生长音效
+        if (window.flowerSounds && window.flowerSounds.growup) {
+            window.flowerSounds.growup.play();
+        }
+        
         return true;
     };
 

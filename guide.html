@@ -50,9 +50,13 @@
             border-radius: 20px;
             padding: 30px;
             margin: 20px;
-            max-width: 500px;
+            max-width: 90vw; /* 改为视窗宽度的90% */
+            max-height: 90vh; /* 添加最大高度限制 */
+            width: auto; /* 自动宽度 */
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             z-index: 10;
+            display: flex;
+            flex-direction: column;
         }
 
         .guide-header {
@@ -93,7 +97,8 @@
 
         .guide-image {
             width: 100%;
-            height: 200px;
+            min-height: 200px;
+            max-height: 50vh; /* 最大高度为视窗的50% */
             background: #f8f9fa;
             border-radius: 12px;
             margin-bottom: 15px;
@@ -103,6 +108,7 @@
             font-size: 14px;
             color: #666;
             border: 2px dashed #ddd;
+            overflow: hidden; /* 隐藏超出部分 */
         }
 
         .guide-text {
@@ -188,10 +194,90 @@
             color: #333;
         }
 
+        /* 自定义确认弹窗 */
+        .confirm-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .confirm-modal.show {
+            display: flex;
+        }
+
+        .confirm-card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            margin: 20px;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .confirm-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .confirm-text {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .confirm-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .confirm-btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+
+        .confirm-btn.cancel {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .confirm-btn.cancel:hover {
+            background: #e0e0e0;
+        }
+
+        .confirm-btn.confirm {
+            background: linear-gradient(135deg, #ff6b9d, #c44569);
+            color: white;
+        }
+
+        .confirm-btn.confirm:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 157, 0.4);
+        }
+
         @media (max-width: 600px) {
             .guide-modal {
-                margin: 15px;
-                padding: 20px;
+                margin: 10px;
+                padding: 15px;
+                max-width: 95vw;
+                max-height: 95vh;
             }
 
             .guide-title {
@@ -200,6 +286,11 @@
 
             .guide-text {
                 font-size: 14px;
+            }
+
+            .guide-image {
+                min-height: 150px;
+                max-height: 40vh;
             }
 
             .fairy-character {
@@ -225,31 +316,41 @@
             <div class="guide-content">
                 <div class="guide-step active" data-step="1">
                     <div class="step-number">第 1 步 / 共 5 步</div>
-                    <div class="guide-image">🌱 点击花盆播种</div>
+                    <div class="guide-image">
+                        <img src="img/guide/1.png" alt="点击花盆播种" style="width:100%; height:100%; object-fit:cover; border-radius:8px;">
+                    </div>
                     <div class="guide-text">点击空花盆，选择你喜欢的花种开始播种吧！</div>
                 </div>
                 
                 <div class="guide-step" data-step="2">
                     <div class="step-number">第 2 步 / 共 5 步</div>
-                    <div class="guide-image">💧 浇水促进生长</div>
+                    <div class="guide-image">
+                        <img src="img/guide/2.png" alt="浇水促进生长" style="width:100%; height:100%; object-fit:cover; border-radius:8px;">
+                    </div>
                     <div class="guide-text">点击花朵可以查看生长状态，记得按时浇水哦！</div>
                 </div>
                 
                 <div class="guide-step" data-step="3">
                     <div class="step-number">第 3 步 / 共 5 步</div>
-                    <div class="guide-image">🌸 收获美丽花朵</div>
+                    <div class="guide-image">
+                        <img src="img/guide/3.png" alt="收获美丽花朵" style="width:100%; height:100%; object-fit:cover; border-radius:8px;">
+                    </div>
                     <div class="guide-text">花朵成熟后点击即可收获，获得经验和花朵奖励！</div>
                 </div>
                 
                 <div class="guide-step" data-step="4">
                     <div class="step-number">第 4 步 / 共 5 步</div>
-                    <div class="guide-image">🏠 交易与兑换</div>
+                    <div class="guide-image">
+                        <img src="img/guide/4.png" alt="交易与兑换" style="width:100%; height:100%; object-fit:cover; border-radius:8px;">
+                    </div>
                     <div class="guide-text">点击房子按钮可以查看收花统计，还能兑换道具哦！</div>
                 </div>
                 
                 <div class="guide-step" data-step="5">
                     <div class="step-number">第 5 步 / 共 5 步</div>
-                    <div class="guide-image">✨ 升级解锁更多</div>
+                    <div class="guide-image">
+                        <img src="img/guide/5.png" alt="升级解锁更多" style="width:100%; height:100%; object-fit:cover; border-radius:8px;">
+                    </div>
                     <div class="guide-text">收获花朵获得经验，升级后可以解锁更多花盆！</div>
                 </div>
             </div>
@@ -260,6 +361,17 @@
                     <button class="nav-btn prev-btn" id="prevBtn" disabled>上一步</button>
                     <button class="nav-btn next-btn" id="nextBtn">下一步</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="confirm-modal" id="confirmModal">
+        <div class="confirm-card">
+            <div class="confirm-title">确认跳过引导？</div>
+            <div class="confirm-text">跳过引导后，你可能会错过重要的游戏操作说明，确定要跳过吗？</div>
+            <div class="confirm-buttons">
+                <button class="confirm-btn cancel" id="cancelSkipBtn">继续引导</button>
+                <button class="confirm-btn confirm" id="confirmSkipBtn">确定跳过</button>
             </div>
         </div>
     </div>
@@ -323,8 +435,24 @@
         
         // 跳过引导
         skipBtn.addEventListener('click', () => {
-            if (confirm('确定要跳过新手引导吗？')) {
-                completeGuide();
+            document.getElementById('confirmModal').classList.add('show');
+        });
+        
+        // 取消跳过
+        document.getElementById('cancelSkipBtn').addEventListener('click', () => {
+            document.getElementById('confirmModal').classList.remove('show');
+        });
+        
+        // 确认跳过
+        document.getElementById('confirmSkipBtn').addEventListener('click', () => {
+            document.getElementById('confirmModal').classList.remove('show');
+            completeGuide();
+        });
+        
+        // 点击遮罩层关闭弹窗
+        document.getElementById('confirmModal').addEventListener('click', (e) => {
+            if (e.target.id === 'confirmModal') {
+                document.getElementById('confirmModal').classList.remove('show');
             }
         });
         

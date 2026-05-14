@@ -73,6 +73,11 @@
                     this.load.image(flower.id + stage, 'img/' + flower.folder + '/' + stage + '.png', { scale: 1 });
                 }
             }
+
+            // 加载音效
+            this.load.audio('planting', 'Sound effect/planting.wav');
+            this.load.audio('growup', 'Sound effect/growup.wav');
+            this.load.audio('levelup', 'Sound effect/levelup.wav');
         },
 
         /**
@@ -82,6 +87,18 @@
         create: function() {
             var self = this;
             var scene = this;
+            
+            // 初始化音效（设置音量）
+            var soundPlanting = this.sound.add('planting', { volume: 1.5 }); // 种植音效加大到1.5倍
+            var soundGrowup = this.sound.add('growup', { volume: 1.5 }); // 生长音效加大到1.5倍
+            var soundLevelup = this.sound.add('levelup', { volume: 1.5 }); // 升级音效加大到1.5倍
+            
+            // 将音效对象保存到全局，方便其他模块调用
+            window.flowerSounds = {
+                planting: soundPlanting,
+                growup: soundGrowup,
+                levelup: soundLevelup
+            };
             
             // 启用纹理过滤，优化缩放质量
             this.textures.get('background').setFilter(Phaser.Textures.FilterMode.LINEAR, Phaser.Textures.FilterMode.LINEAR);
@@ -158,7 +175,7 @@
 
             /**
              * 更新花农位置（窗口大小变化时）
-             * 放在左下角，距离底部10%高度
+             * 放在房子右侧，允许与房子重叠
              */
             function positionFarmer() {
                 var nImg = scene.textures.get('npcFarmer').getSourceImage();
@@ -168,8 +185,14 @@
 
                 var npcScale = (scene.scale.width / 5.5) / nImg.width;
                 npcFarmer.setScale(npcScale * 1.2); // 放大20%
-                npcFarmer.x = npcFarmer.displayWidth * 0.5 + 10;
-                npcFarmer.y = scene.scale.height * 0.9;
+                
+                // 基于房子的位置来定位花农
+                var houseX = house.x;
+                var houseWidth = house.displayWidth;
+                
+                // 将花农定位在房子右侧，重叠约1/3的宽度
+                npcFarmer.x = houseX + houseWidth * 0.7; 
+                npcFarmer.y = scene.scale.height * 0.6; // 垂直位置调整为屏幕高度的60%
             }
             positionFarmer();
 
@@ -460,11 +483,22 @@
                         state.unlockedPotCount = cfg.TOTAL_POTS;
                         applyUnlockedStateToPots();
                         ui.showLevelUpToast(state.level, true);
+                        
+                        // 播放升级音效
+                        if (window.flowerSounds && window.flowerSounds.levelup) {
+                            window.flowerSounds.levelup.play();
+                        }
+                        
                         break;
                     }
 
                     // 显示升级提示
                     ui.showLevelUpToast(state.level, false);
+                    
+                    // 播放升级音效
+                    if (window.flowerSounds && window.flowerSounds.levelup) {
+                        window.flowerSounds.levelup.play();
+                    }
                 }
 
                 ui.render(state);
@@ -538,28 +572,32 @@
 
     // ========== Phaser 3 游戏实例 ==========
     var game = new Phaser.Game({
-        type: Phaser.AUTO,
-        width: 360,
-        height: 640,
-        parent: '',
-        backgroundColor: '#000000',
-        scale: {
-            mode: Phaser.Scale.RESIZE,
-            autoCenter: Phaser.Scale.CENTER_BOTH,
-            autoRound: false,  // 禁用自动取整，保持亚像素精度
-            resolution: window.devicePixelRatio || 1  // 使用设备像素比
-        },
-        scene: [FlowerScene],
-        render: {
-            antialias: true,    // 启用抗锯齿
-            antialiasGL: true,  // WebGL抗锯齿
-            roundPixels: false,  // 允许亚像素渲染
-            pixelArt: false,     // 关闭像素艺术模式
-            preservePixelArt: false,  // 不保留像素艺术
-            clearBeforeRender: true
-        },
-        canvasStyle: 'image-rendering: -moz-crisp-edges; image-rendering: -webkit-crisp-edges; image-rendering: pixelated; image-rendering: crisp-edges;'  // 优化图像渲染
-    });
+    type: Phaser.WEBGL,          // 强制WebGL，画质最好
+    width: 1080,                 // 保持你要的高清分辨率
+    height: 1920,
+    parent: '',
+    backgroundColor: '#000000',  // 背景黑色，和你一致
+
+    scale: {
+        mode: Phaser.Scale.RESIZE,  // 绝对不拉伸！不变形！
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        autoRound: false,
+        resolution: window.devicePixelRatio || 1
+    },
+
+    scene: [FlowerScene],
+
+    render: {
+        antialias: true,
+        antialiasGL: true,
+        roundPixels: false,
+        pixelArt: false,       // 关闭像素风
+        preservePixelArt: false
+    },
+
+    // 重点：把像素风格的样式全部删掉！换成高清模式
+    canvasStyle: 'image-rendering: auto; image-rendering: optimizeQuality;'
+});
 
     // ========== 启动加载页函数 ==========
 

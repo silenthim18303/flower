@@ -18,10 +18,11 @@
     // 引入各子模块
     var level = window.FlowerUILevel;
     var warehouse = window.FlowerUIWarehouse;
+    var daily = window.FlowerUIDaily;
     var toolbar = window.FlowerUIToolbar;
     var collect = window.FlowerUICollect;
-    var daily = window.FlowerUIDaily;
     var exchange = window.FlowerUIExchange;
+    var settings = window.FlowerUISettings;
     var help = window.FlowerUIHelp;
 
     /**
@@ -88,6 +89,7 @@
         collect.create(ctx);         // 收花统计弹窗
         daily.createModal(ctx);      // 每日任务弹窗
         exchange.create(ctx);        // 花农兑换弹窗
+        settings.createButton(ctx);  // 设置按钮
     }
 
     /**
@@ -107,6 +109,7 @@
         warehouse.renderList(ctx, state);            // 仓库列表
         daily.render(ctx, state);                    // 每日任务
         exchange.render(ctx, state);                 // 花农兑换
+        settings.render(ctx, state);                 // 设置界面
         toolbar.renderSeedSelection(ctx, state.selectedFlowerType);  // 种子选中状态
         toolbar.renderQuickActions(ctx, state);      // 快捷按钮状态
 
